@@ -3,7 +3,7 @@ A 3d map editor designed to accompany tuning software that lack 3d graph support
 
 Designed as a user control for easy embedding. 
 
-![alt text](https://imgur.com/Nph8pO1)
+![alt text](https://i.imgur.com/upWuZAM.png)
 
 Utilises the following libraries:
 
