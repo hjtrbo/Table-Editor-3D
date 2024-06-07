@@ -1,5 +1,5 @@
 # Table-Editor-3D
-A c# win forms user control 3d map editor designed to accompany tuning software that lack 3d graph support
+A c# winforms user control 3d map editor designed to accompany tuning software that lack 3d graph support
 
 ![alt text](https://i.imgur.com/upWuZAM.png)
 
