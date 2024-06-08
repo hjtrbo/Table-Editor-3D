@@ -55,7 +55,7 @@ namespace TableEditor
 
     #region IMPLEMENTATION NOTES
     //
-    // Setup notes for embedding this control in the hosting form
+    // Setup notes for embedding this control in the hosting form. Refer to Demo.cs to see a working implementation
     //
 
     //
@@ -71,13 +71,15 @@ namespace TableEditor
     //
 
     //
-    // Table editor user control minimum required settings. Copy these to the host forms Load() event
+    // Table editor user control minimum required settings. Copy these to the host forms HandleCreated() event
     //      nateDogg.Graph3dEnabled    = true;
     //      nateDogg.UseMyScrollBars   = true;
     //      nateDogg.HideToolBar       = false;
     //      nateDogg.UndoEnabled       = true;
-    //      nateDogg.UseHPColourTheme  = true;
+    //      nateDogg.AverageEnabled    = true;
+    //      nateDogg.ColourTheme       = ColourScheme.HpNormal
     //      nateDogg.CopyPasteSetMode  = CopyPasteMode.All;
+    // Then call nateDogg.Initialise();
     //
     #endregion
 
