@@ -478,6 +478,7 @@ namespace TableEditor
         {
             bool numberFormatFound = false;
             string numberFormat = "N0"; // default
+            double value;
 
             // Checks each new entry cell has a mate in the new entry count cell 
             if (CheckDataBeforePushToRunAvg())
@@ -502,11 +503,18 @@ namespace TableEditor
                             numberFormatFound = true;
                         }
 
+                        // Debug, temp vars for each dt read op
+                        double d0 = dgv_RunAvg.ReadDt(i, j);
+                        double d1 = dgv_RunAvgCnt.ReadDt(i, j);
+                        double d2 = dgv_NewEntry.ReadDt(i, j);
+                        double d3 = dgv_NewEntryCnt.ReadDt(i, j);
+
                         // Work out the average
                         // (Current average * Current count) + (New average * New count) / (Current count + New count)
-                        double value = (dgv_RunAvg.ReadDt(i, j) * dgv_RunAvgCnt.ReadDt(i, j) +
-                                        dgv_NewEntry.ReadDt(i, j) * dgv_NewEntryCnt.ReadDt(i, j)) /
-                                        (dgv_RunAvgCnt.ReadDt(i, j) + dgv_NewEntryCnt.ReadDt(i, j));
+                        value = (dgv_RunAvg.ReadDt(i, j)    * dgv_RunAvgCnt.ReadDt(i, j) +
+                                 dgv_NewEntry.ReadDt(i, j)  * dgv_NewEntryCnt.ReadDt(i, j)) /
+                                (dgv_RunAvgCnt.ReadDt(i, j) + dgv_NewEntryCnt.ReadDt(i, j));
+                        dgv_RunAvg.WriteDt(i, j, value);
 
                         // Add up the running counts
                         value = dgv_RunAvgCnt.ReadDt(i, j) + dgv_NewEntryCnt.ReadDt(i, j);

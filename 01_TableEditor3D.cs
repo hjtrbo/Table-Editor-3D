@@ -4268,6 +4268,9 @@ namespace TableEditor
             // Triggers a capture of the dgv image. At this point this class's properties (although somewhat scattered)
             // will reflect the paste data change event ags
             Undo_Set(myEvents.BuildEventArgs_DgvDataChanged_Event());
+
+            // Will fire off a data changed event to trigger the grpah to re-draw
+            myEvents.Req_DgvDataChanged_Event();
         }
         private void Undo_Completed_NDR(object sender, DgvData e)
         {
@@ -10620,6 +10623,9 @@ namespace TableEditor
             //string[] lines = input.Trim().Split('\n');
             string[] lines = input.Split('\n');
 
+            // Modified 10/8/24. If having to modify again, test average tool paste with data from VCM scanner 
+            return lines.Count();
+
             // Initialize a list to store the second entry of each row
             List<string> list = new List<string>();
 
@@ -10646,7 +10652,11 @@ namespace TableEditor
             string[] rows = input.Split('\n');
 
             // Split the second row (index 1) into an array of columns using space and tab characters as delimiters, removing any empty entries
-            string[] columns = rows[0].Trim().Split('\t');
+            //string[] columns = rows[0].Trim().Split('\t');
+            string[] columns = rows[0].Split('\t');
+
+            // Modified 10/8/24. If having to modify again, test average tool paste with data from VCM scanner
+            return columns.Count();
 
             // If column header is present skip the first element as it will be blank
             if (!Utils.IsNumber(columns[0]) || columns[0] == String.Empty)
