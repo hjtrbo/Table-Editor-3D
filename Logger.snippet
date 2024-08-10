@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>Method with Logger</Title>
+            <Shortcut>logger</Shortcut>
+            <Description>Method template with logger call</Description>
+            <Author>Your Name</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>methodName</ID>
+                    <ToolTip>Method name</ToolTip>
+                    <Default>MyMethod</Default>
+                </Literal>
+                <Literal>
+                    <ID>parameters</ID>
+                    <ToolTip>Method parameters</ToolTip>
+                    <Default></Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[
+                public void $methodName$($parameters$)
+                {
+                    Logger.Log(this, $$"message"); // Class, class instance & method names are automatically retrieved 
+
+                    // Method implementation
+                }
+                ]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+</CodeSnippets>

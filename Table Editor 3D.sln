@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Table Editor 3D", "Table Editor 3D.csproj", "{FC059A54-9C7D-47AB-A9AC-45CB71373855}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6DFEF14C-8A60-4F3F-9480-4BADE09C6505}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC059A54-9C7D-47AB-A9AC-45CB71373855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC059A54-9C7D-47AB-A9AC-45CB71373855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC059A54-9C7D-47AB-A9AC-45CB71373855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC059A54-9C7D-47AB-A9AC-45CB71373855}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A14711D7-D7EE-4ED8-812B-FD0AC494FB56}
+	EndGlobalSection
+EndGlobal

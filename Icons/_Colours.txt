@@ -1,0 +1,12 @@
+Light blue 		  63,  142, 209 
+efilive Light Blue  98,  138, 215	628AD7
+efilive Dark blue   37,  76,  154	254C9A
+Background          240, 240, 240
+Selected background 172, 202, 228 
+
+Paint.net
+Magic wand icon to new layer.
+Use the recolour tool, select icon colour, hardness 30, tolerance default, disable anti-aliasing
+Set paint bucket to set background layer colour
+
+The first click of the tool sets how the colour is faded across different line opacities. Play with the first click location.
