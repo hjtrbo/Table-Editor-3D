@@ -1326,7 +1326,7 @@ namespace TableEditor
         {
             dgvCtrl.Events_CellDataAndSelectionChanged_Pause();
 
-            MovingAverage.Smooth(dgvCtrl.dgv, dgvCtrl.SelectedCellCollection, MovingAverage.Mode.All);
+            MovingAverage.Smooth(dgvCtrl.dgv, dgvCtrl.SelectedCellCollection, MovingAverage.Mode.Vertical);
 
             dgvCtrl.Events_CellDataAndSelectionChanged_Resume(true);
 
@@ -2500,7 +2500,7 @@ namespace TableEditor
             _dgv.AllowUserToResizeRows = false;
             _dgv.ReadOnly = false; // If false allows user to edit cells
             _dgv.ShowCellToolTips = false;
-            _dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            _dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableWithoutHeaderText; // Not needed, default is fine
 
             // Cunt. This code snippet gets rid of the stupid triangle in the row header cell when row height is
             // > 16. 
@@ -4624,6 +4624,12 @@ namespace TableEditor
                     if (!incDecTask.Mode.Enabled)
                         Dgv_IncDecKeyDown();
                 }
+            }
+
+            // If ctrl + c initiate paste
+            if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && Keyboard.IsKeyDown(Key.V))
+            {
+                paste.ParseClipboardToDgv(this, Paste.Mode.PasteToCurrentCell, Paste.DataSource.ClipBoard);
             }
         }
 

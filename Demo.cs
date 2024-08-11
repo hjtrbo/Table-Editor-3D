@@ -175,17 +175,17 @@ namespace TableEditor
 
             // Dgv control
             debug.DgvCtrl_EventDebug = true;
-            debug.DgvCtrl_DataChangedDebug = false;
+            debug.DgvCtrl_DataChangedDebug = true;
             debug.DgvCtrl_SelectionChangedDebug = false;
             debug.DgvCtrl_SizeChangedDebug = false;
             debug.DgvCtrl_MouseDebug = false;
             debug.DgvCtrl_incDecTask_Debug = false;
-            debug.DgvCtrl_paste_Debug = false;
+            debug.DgvCtrl_paste_Debug = true;
             debug.DgvCtrl_undo_Debug = false;
             debug.DgvCtrl_DgvData_Debug = false;
 
             // My events
-            debug.DgvCtrl_myEvents_DebugAll = false;
+            debug.DgvCtrl_myEvents_DebugAll = true;
             debug.DgvCtrl_myEvents_DebugDataChngd = true;
             debug.DgvCtrl_myEvents_DebugSizeChngd = false;
             debug.DgvCtrl_myEvents_DebugSelnChngd = false;
@@ -211,7 +211,7 @@ namespace TableEditor
             debug.DgvGrph3dIntfc_DebugSelectionPoints = false;
 
             // Graph3d
-            debug.Graph3dCtrl_DebugData = false;
+            debug.Graph3dCtrl_DebugData = true;
             debug.Graph3dCtrl_DebugData_WithPrint = false;
             debug.Graph3dCtrl_DebugPointMoveMode = false;
             debug.Graph3dCtrl_DebugPointSelectMode = false;
