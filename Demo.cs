@@ -8,10 +8,10 @@ namespace TableEditor
 {
     public partial class Demo : Form
     {
-        // These are the table editor user control objects
+        // These are the table editor user control objects...
         TableEditor3D nateDogg, snoopDogg, iceCube, eminem;
 
-        // Which will get packed into this list
+        // ...which will get packed into this list
         List<TableEditor3D> tableEditor3dList = new List<TableEditor3D>();
 
         public Demo()

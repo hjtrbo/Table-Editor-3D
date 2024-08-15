@@ -1728,7 +1728,10 @@ namespace Plot3D
             /// </summary>
             public cPoint3D GetPointAt(int s32_Column, int s32_Row)
             {
-                return mi_PointArray[s32_Column, s32_Row];
+                // 15/08/2024 having trouble with null been returned. Need to sort this out
+                cPoint3D point = mi_PointArray[s32_Column, s32_Row];
+
+                return point;
             }
 
             /// <summary>

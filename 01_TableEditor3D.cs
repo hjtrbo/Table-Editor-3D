@@ -5784,9 +5784,15 @@ namespace TableEditor
             pt.Z = (double)dgvCtrl.dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
 
             // Get the axis tags 
-            pt.X_AxisTag = X_AxisLabels[e.ColumnIndex];
-            pt.Y_AxisTag = Y_AxisLabels[e.RowIndex];
-
+            try
+            {
+                pt.X_AxisTag = X_AxisLabels[e.ColumnIndex];
+                pt.Y_AxisTag = Y_AxisLabels[e.RowIndex];
+            }
+            catch
+            {
+                // do nothing
+            }
             // Hash code calc
             pt.HashCode = pt.GetHashCode();
 
