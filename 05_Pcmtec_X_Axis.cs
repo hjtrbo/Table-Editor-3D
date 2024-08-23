@@ -26,10 +26,12 @@ namespace TableEditor
             // Quick, loose and dirty
             try
             {
+                // This is the text copied from pcmtec
                 string[] sArray1D = textBox_PCMTEC_X_Axis.Text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 
                 string[,] sArray2D = new string[sArray1D.Length, 2];
 
+                // Converts each text row into a 2d array where each array index is a pair of values
                 int k = 0;
                 foreach (string s in sArray1D)
                 {
@@ -41,12 +43,19 @@ namespace TableEditor
                     k++;
                 }
 
+                // Parse the text to doubles
                 double[,] d = new double[sArray2D.GetLength(0), sArray2D.GetLength(1)];
-
-                for (int i = 0; i < sArray2D.GetLength(0); i++)
+                try
                 {
-                    d[i, 0] = double.Parse(sArray2D[i, 0]);
-                    d[i, 1] = double.Parse(sArray2D[i, 1]);
+                    for (int i = 0; i < sArray2D.GetLength(0); i++)
+                    {
+                        d[i, 0] = double.Parse(sArray2D[i, 0]);
+                        d[i, 1] = double.Parse(sArray2D[i, 1]);
+                    }
+                }
+                catch
+                {
+                    throw new Exception();
                 }
 
                 x_Axis = new double[sArray2D.GetLength(0)];
@@ -56,6 +65,7 @@ namespace TableEditor
                 int pointerToInputArray = 0;
                 int pointerToInputArray_Prev = 0;
 
+                // Build the x axis by filling in the blanks between known values
                 for (int i = 0; i < sArray2D.GetLength(0); i++)
                 {
                     if (i == d[pointerToInputArray, 0]) // match found
@@ -95,7 +105,7 @@ namespace TableEditor
                 Console.WriteLine($"{InstanceName} PasteWithXAxisPcmtecDialog() {ex.Message} at line {ex.StackTrace.Substring(ex.StackTrace.LastIndexOf(":line"))}");
 #endif
 
-                DialogResult result = MessageBox.Show("Could not parse input. Please check correct format and length.", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+                DialogResult result = MessageBox.Show("Could not parse input. Please check correct format.", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
 
                 if (result == DialogResult.Cancel)
                 {
@@ -108,17 +118,58 @@ namespace TableEditor
         {
             ParseTextInput();
 
+            string message = "";
+            bool trim = false;
+
             if (x_Axis != null)
-                if (x_Axis.Length != dgvCtrl.dgv.ColumnCount)
-                    x_Axis = null;
-
-            if (x_Axis == null)
             {
-                DialogResult result = MessageBox.Show("Could not parse input. Please check correct format and length.", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
-
-                if (result == DialogResult.Cancel)
+                message = "X axis result was null";
+                if (x_Axis.Length != dgvCtrl.dgv.ColumnCount)
                 {
-                    Close();
+                    trim = true;
+                    message = "Length of the attempted x axis paste is not the same as the tables x axis length. ";
+                }
+            }
+
+            // Handle the jandle
+            if (x_Axis == null || trim == true)
+            {
+                // Fatal
+                if (x_Axis == null)
+                {
+                    DialogResult result = MessageBox.Show("Could not parse input. " + message + "", "Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+
+                    if (result == DialogResult.Cancel)
+                    {
+                        Close();
+                    }
+                    else // retry
+                    {
+                        return;
+                    }
+                }
+
+                // Give the option to shorten the table
+                if (trim)
+                {
+                    DialogResult result = MessageBox.Show("Could not parse input. " + message + "", "Error", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Error);
+
+                    if (result == DialogResult.Abort)
+                    {
+                        x_Axis = null;
+                        Close();
+                    }
+                    else if (result == DialogResult.Ignore) // We'll write to the available columns only 
+                    {
+                        // Get number format
+                        NumberFormat = Utils.FormatDouble(x_Axis);
+
+                        Close();
+                    }
+                    else // retry
+                    {
+                        return;
+                    }
                 }
             }
             else // all good

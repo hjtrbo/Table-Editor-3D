@@ -1154,6 +1154,20 @@ namespace TableEditor
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
 
+        private void Paste_DivideByPercent(object sender, EventArgs e)
+        {
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_DivideByPercent);
+
+            dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
+        }
+
+        private void Paste_DivideByPercentHalf(object sender, EventArgs e)
+        {
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_DivideByPercentHalf);
+
+            dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
+        }
+
         private void Paste_Add(object sender, EventArgs e)
         {
             dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_Add);
@@ -3132,16 +3146,17 @@ namespace TableEditor
                 Console.WriteLine($"{InstanceName} - {ClassName} - WriteColHeaderLabels()");
 
             // Length must match current table dimension
-            if (column_Labels.Length != dt.Columns.Count)
-                return;
+            // 7/9/24 Commented out to allow pcmtec x axis import to be the incorrect length
+            //if (column_Labels.Length != dt.Columns.Count)
+            //    return;
 
             if (format == "999")
-                for (int i = 0; i < column_Labels.Length; i++)
+                for (int i = 0; i < column_Labels.Length && i < dgv.Columns.Count; i++)
                 {
                     dgv.Columns[i].HeaderText = column_Labels[i].ToString();
                 }
             else
-                for (int i = 0; i < column_Labels.Length; i++)
+                for (int i = 0; i < column_Labels.Length && i < dgv.Columns.Count; i++)
                 {
                     dgv.Columns[i].HeaderText = column_Labels[i].ToString(format);
                 }
@@ -4020,7 +4035,7 @@ namespace TableEditor
                 e.TableDataFormat = dgvCtrl.DataTableFormat;
 
                 // Convert values to text headers
-                if (dgvCtrl.UseMyScrollBars)
+                if (!dgvCtrl.UseMyScrollBars)
                 {
                     e.RowHeadersText = dgvCtrl.dgvHeaders.ReadRowHeaders();
                     e.ColHeadersText = dgvCtrl.dgvHeaders.ReadColHeaders();
@@ -9711,6 +9726,8 @@ namespace TableEditor
             PasteToCurrentCell,
             PasteSpecial_MultiplyByPercent,
             PasteSpecial_MultiplyByPercentHalf,
+            PasteSpecial_DivideByPercent,
+            PasteSpecial_DivideByPercentHalf,
             PasteSpecial_Add,
             PasteSpecial_Subtract,
             Default
@@ -9843,6 +9860,8 @@ namespace TableEditor
 
                     case Mode.PasteSpecial_MultiplyByPercent:
                     case Mode.PasteSpecial_MultiplyByPercentHalf:
+                    case Mode.PasteSpecial_DivideByPercent:
+                    case Mode.PasteSpecial_DivideByPercentHalf:
                     case Mode.PasteSpecial_Add:
                     case Mode.PasteSpecial_Subtract:
                         clipboard.RowHeaderPresent = false;
@@ -9968,10 +9987,13 @@ namespace TableEditor
                     case Mode.PasteToCurrentCell:
                     case Mode.PasteSpecial_MultiplyByPercent:
                     case Mode.PasteSpecial_MultiplyByPercentHalf:
+                    case Mode.PasteSpecial_DivideByPercent:
+                    case Mode.PasteSpecial_DivideByPercentHalf:
                     case Mode.PasteSpecial_Add:
                     case Mode.PasteSpecial_Subtract:
-                        clipboard.RowLength = GetRowCountFromRawInputText(clipboard.RawClipboardText);
-                        clipboard.ColLength = GetColCountFromRawInputText(clipboard.RawClipboardText);
+                        // 23/08/24 fucking array bounds errors
+                        //clipboard.RowLength = GetRowCountFromRawInputText(clipboard.RawClipboardText);
+                        //clipboard.ColLength = GetColCountFromRawInputText(clipboard.RawClipboardText);
                         break;
 
                     case Mode.PasteXAxis:
@@ -10031,6 +10053,8 @@ namespace TableEditor
                     case Mode.PasteToCurrentCell:
                     case Mode.PasteSpecial_MultiplyByPercent:
                     case Mode.PasteSpecial_MultiplyByPercentHalf:
+                    case Mode.PasteSpecial_DivideByPercent:
+                    case Mode.PasteSpecial_DivideByPercentHalf:
                     case Mode.PasteSpecial_Add:
                     case Mode.PasteSpecial_Subtract:
                         // We must have at least 1 row and 1 column to continue processing the clipboard
@@ -10242,6 +10266,8 @@ namespace TableEditor
                     case Mode.PasteToCurrentCell:
                     case Mode.PasteSpecial_MultiplyByPercent:
                     case Mode.PasteSpecial_MultiplyByPercentHalf:
+                    case Mode.PasteSpecial_DivideByPercent:
+                    case Mode.PasteSpecial_DivideByPercentHalf:
                     case Mode.PasteSpecial_Add:
                     case Mode.PasteSpecial_Subtract:
                         clipboard.TableData = new double[clipboard.RowLength, clipboard.ColLength];
@@ -10425,6 +10451,8 @@ namespace TableEditor
                     case Mode.PasteToCurrentCell:
                     case Mode.PasteSpecial_MultiplyByPercent:
                     case Mode.PasteSpecial_MultiplyByPercentHalf:
+                    case Mode.PasteSpecial_DivideByPercent:
+                    case Mode.PasteSpecial_DivideByPercentHalf:
                     case Mode.PasteSpecial_Add:
                     case Mode.PasteSpecial_Subtract:
                         #region
@@ -10493,6 +10521,14 @@ namespace TableEditor
 
                                         case Mode.PasteSpecial_MultiplyByPercentHalf:
                                             dgvDataTable[i, j] = MultiplyByPercent(0.5, dgvDataTable[i, j], clipboard.TableData[m, n]);
+                                            break;
+
+                                        case Mode.PasteSpecial_DivideByPercent:
+                                            dgvDataTable[i, j] = DivideByPercent(1.0, dgvDataTable[i, j], clipboard.TableData[m, n]);
+                                            break;
+
+                                        case Mode.PasteSpecial_DivideByPercentHalf:
+                                            dgvDataTable[i, j] = DivideByPercent(0.5, dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
 
                                         case Mode.PasteSpecial_Add:
@@ -10750,6 +10786,11 @@ namespace TableEditor
         private double MultiplyByPercent(double percentScalar, double dataValue, double modifierValue)
         {
             return dataValue * (1 + modifierValue * percentScalar / 100);
+        }
+
+        private double DivideByPercent(double percentScalar, double dataValue, double modifierValue)
+        {
+            return dataValue / (1 + modifierValue * percentScalar / 100);
         }
 
         private double Add(double dataValue, double modifierValue)

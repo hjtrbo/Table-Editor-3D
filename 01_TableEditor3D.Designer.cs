@@ -37,6 +37,8 @@
             this.ToolStrip_PasteSpecial = new System.Windows.Forms.ToolStripMenuItem();
             this.multiplyByToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.multiplyByHalfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.divideByToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.divideByHalfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.subtractToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStrip_PasteWithXYAxis = new System.Windows.Forms.ToolStripMenuItem();
@@ -150,6 +152,8 @@
             this.ToolStrip_PasteSpecial.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.multiplyByToolStripMenuItem,
             this.multiplyByHalfToolStripMenuItem,
+            this.divideByToolStripMenuItem,
+            this.divideByHalfToolStripMenuItem,
             this.addToolStripMenuItem,
             this.subtractToolStripMenuItem});
             this.ToolStrip_PasteSpecial.Name = "ToolStrip_PasteSpecial";
@@ -169,6 +173,20 @@
             this.multiplyByHalfToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
             this.multiplyByHalfToolStripMenuItem.Text = "Multiply by % Half";
             this.multiplyByHalfToolStripMenuItem.Click += new System.EventHandler(this.Paste_MultiplyByPercentHalf);
+            // 
+            // divideByToolStripMenuItem
+            // 
+            this.divideByToolStripMenuItem.Name = "divideByToolStripMenuItem";
+            this.divideByToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.divideByToolStripMenuItem.Text = "Divide by %";
+            this.divideByToolStripMenuItem.Click += new System.EventHandler(this.Paste_DivideByPercent);
+            // 
+            // divideByHalfToolStripMenuItem
+            // 
+            this.divideByHalfToolStripMenuItem.Name = "divideByHalfToolStripMenuItem";
+            this.divideByHalfToolStripMenuItem.Size = new System.Drawing.Size(172, 22);
+            this.divideByHalfToolStripMenuItem.Text = "Divide by % Half";
+            this.divideByHalfToolStripMenuItem.Click += new System.EventHandler(this.Paste_DivideByPercentHalf);
             // 
             // addToolStripMenuItem
             // 
@@ -1155,5 +1173,7 @@
         private System.Windows.Forms.Button btn_Graph3d_PointSelectMode;
         private System.Windows.Forms.Button btn_Graph3d_PointMoveMode;
         private System.Windows.Forms.Button btn_LoadSample4;
+        private System.Windows.Forms.ToolStripMenuItem divideByToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem divideByHalfToolStripMenuItem;
     }
 }
