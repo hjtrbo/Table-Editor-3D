@@ -132,10 +132,10 @@ namespace TableEditor
             tabPage1.Show();
 
             // Sample data button clicks
-            nateDogg. btn_LoadSample3_Click();
-            snoopDogg.btn_LoadSample4_Click();
-            iceCube.  btn_LoadSample1_Click();
-            eminem.   btn_LoadSample2_Click();
+            //nateDogg. btn_LoadSample3_Click();
+            //snoopDogg.btn_LoadSample4_Click();
+            //iceCube.  btn_LoadSample1_Click();
+            //eminem.   btn_LoadSample2_Click();
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)

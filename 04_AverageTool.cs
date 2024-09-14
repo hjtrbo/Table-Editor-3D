@@ -428,7 +428,7 @@ namespace TableEditor
                 // Paste
                 // Set current cell to 0,0 
                 dgv_NewEntry.SetDgvCurrentCell(0, 0);
-                dgv_NewEntry.paste.ParseClipboardToDgv(dgv_NewEntry, Paste.Mode.PasteToCurrentCell);
+                dgv_NewEntry.paste.ParseClipboardToDgv(dgv_NewEntry, Paste.eMode.PasteToCurrentCell);
                 dgv_NewEntry.Refresh(RefreshMode.AverageTool);
 
                 // Post process the dgv, hide all the 0's
@@ -440,7 +440,7 @@ namespace TableEditor
                 // Paste
                 // Set current cell to 0,0 
                 dgv_NewEntryCnt.SetDgvCurrentCell(0, 0);
-                dgv_NewEntryCnt.paste.ParseClipboardToDgv(dgv_NewEntryCnt, Paste.Mode.PasteToCurrentCell);
+                dgv_NewEntryCnt.paste.ParseClipboardToDgv(dgv_NewEntryCnt, Paste.eMode.PasteToCurrentCell);
                 dgv_NewEntryCnt.Refresh(RefreshMode.AverageTool);
 
                 // Post process the dgv, hide all the 0's

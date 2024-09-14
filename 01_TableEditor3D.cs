@@ -305,7 +305,7 @@ namespace TableEditor
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public int RotationTransposed { get { return rotationTransposed; } set { rotationTransposed = value; if (graph3dCtrl != null) graph3dCtrl.RotationTransposed = value; } }
+        public int RotationTransposed { get { return rotationTransposed; } set { rotationTransposed = value; if (graph3dCtrl != null) graph3dCtrl.RotationTranspose = value; } }
 
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -605,24 +605,24 @@ namespace TableEditor
             if (UseMyScrollBars)
                 DgvHeaderControls = new DgvHeaderCntrls
                 {
-                    RowHeader = rowHeader,
-                    ColHeader = colHeader,
-                    BlankingPanel = blankingPanel,
-                    vScrollBar = vScrollBar,
-                    hScrollBar = hScrollBar,
+                    RowHeader      = rowHeader,
+                    ColHeader      = colHeader,
+                    BlankingPanel  = blankingPanel,
+                    vScrollBar     = vScrollBar,
+                    hScrollBar     = hScrollBar,
                     splitContainer = splitContainer1
                 };
 
             dgvCtrl = new DgvCtrl
             {
                 Dgv = DgvTable,
-                UseMyScrollBars = UseMyScrollBars,
-                ScrollBarCntrls = ScrollBarControls,
-                DgvHeaderCntrls = DgvHeaderControls,
-                UndoEnabled     = UndoEnabled,
+                UseMyScrollBars  = UseMyScrollBars,
+                ScrollBarCntrls  = ScrollBarControls,
+                DgvHeaderCntrls  = DgvHeaderControls,
+                UndoEnabled      = UndoEnabled,
                 CopyPasteEnabled = CopyPasteEnabled,
-                ColourTheme  = ColourTheme,
-                InstanceName = InstanceName
+                ColourTheme      = ColourTheme,
+                InstanceName     = InstanceName
             };
             dgvCtrl.Initialise(); // Sets up the dgvCtrl class
 
@@ -653,8 +653,8 @@ namespace TableEditor
         private void Graph3d_Initialise()
         {
             // Focus events
-            dgvCtrl.dgv.MouseEnter += Dgv_MouseEnter;
-            dgvCtrl.dgv.MouseLeave += Dgv_MouseLeave;
+            dgvCtrl.dgv.MouseEnter         += Dgv_MouseEnter;
+            dgvCtrl.dgv.MouseLeave         += Dgv_MouseLeave;
             graph3dCtrl.graph3d.MouseEnter += Graph3d_MouseEnter;
             graph3dCtrl.graph3d.MouseLeave += Graph3d_MouseLeave;
 
@@ -666,27 +666,29 @@ namespace TableEditor
 
             // Graph3d keyboard events for point selection mode buttons
             graph3dCtrl.graph3d.KeyDown += Graph3d_KeyDown;
-            graph3dCtrl.graph3d.KeyUp += Graph3d_KeyUp;
+            graph3dCtrl.graph3d.KeyUp   += Graph3d_KeyUp;
 
             // Editor3D backcolor done here so I can see it in the form designer
             Graph3d_UserControl.BackColor = SystemColors.Control;
 
-            graph3dCtrl.Zoom = Zoom;
-            graph3dCtrl.Elevation = Elevation;
-            graph3dCtrl.Rotation = Rotation;
-            graph3dCtrl.RotationTransposed = RotationTransposed;
-            graph3dCtrl.ShowAxis = ShowAxis;
-            graph3dCtrl.ShowAxisLabels = ShowAxisLabels;
-            dgvGrph3dIntfc.MirrorPoints = MirrorPoints;
-            graph3dCtrl.MirrorPoints = MirrorPoints;
-            //graph3dCtrl.ShowToolTip =
+            // Push settings
+            graph3dCtrl.Zoom              = Zoom;
+            graph3dCtrl.Elevation         = Elevation;
+            graph3dCtrl.Rotation          = Rotation;
+            graph3dCtrl.RotationTranspose = RotationTransposed;
+            graph3dCtrl.ShowAxis          = ShowAxis;
+            graph3dCtrl.ShowAxisLabels    = ShowAxisLabels;
+            graph3dCtrl.MirrorPoints      = MirrorPoints;
             graph3dCtrl.ShowGraphPosition = ShowGraphPosition;
             graph3dCtrl.SelectPointColour = GraphPointsColour;
-            graph3dCtrl.SelectPointSize = GraphPointSize;
-            //graph3dCtrl.ShowLegend = 
+            graph3dCtrl.SelectPointSize   = GraphPointSize;
+            graph3dCtrl.InstanceName      = InstanceName;
+            dgvGrph3dIntfc.MirrorPoints   = MirrorPoints;
+            // Can't remember why I commented these out
+            //graph3dCtrl.ShowToolTip =
+            //graph3dCtrl.ShowLegend  = 
             //graph3dCtrl.MirrorXAxis = 
             //graph3dCtrl.MirrorYAxis = 
-            graph3dCtrl.InstanceName = InstanceName;
         }
 
         private void SplitContainer_Initialise()
@@ -763,20 +765,20 @@ namespace TableEditor
         {
             userSettings = new UserSettings();
 
-            ShowSamples = userSettings.ShowSamples;
+            ShowSamples        = userSettings.ShowSamples;
             ShowButtonToolTips = userSettings.ShowButtonToolTips;
-            ShowGraphPanel = userSettings.ShowGraphPanelOnStart;
-            ShowAxis = userSettings.ShowAxis;
-            ShowAxisLabels = userSettings.ShowAxisLabels;
-            MirrorPoints = userSettings.MirrorPoints;
-            ShowGraphPosition = userSettings.ShowGraphPosition;
-            GraphPointsColour = userSettings.GraphPointsColour;
-            GraphPointSize = userSettings.GraphPointSize;
-            SelectRadius = userSettings.SelectRadius;
-            Rotation = userSettings.Rotation;
+            ShowGraphPanel     = userSettings.ShowGraphPanelOnStart;
+            ShowAxis           = userSettings.ShowAxis;
+            ShowAxisLabels     = userSettings.ShowAxisLabels;
+            MirrorPoints       = userSettings.MirrorPoints;
+            ShowGraphPosition  = userSettings.ShowGraphPosition;
+            GraphPointsColour  = userSettings.GraphPointsColour;
+            GraphPointSize     = userSettings.GraphPointSize;
+            SelectRadius       = userSettings.SelectRadius;
+            Rotation           = userSettings.Rotation;
             RotationTransposed = userSettings.RotationTransposed;
-            Elevation = userSettings.Elevation;
-            Zoom = userSettings.Zoom;
+            Elevation          = userSettings.Elevation;
+            Zoom               = userSettings.Zoom;
         }
 
         public void KillTimers()
@@ -1071,7 +1073,7 @@ namespace TableEditor
 
             DgvNumberFormat.CelLckOut = false;
 
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteTableWithXYAxis);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteTableWithXYAxis);
 
             //if (DebugForm)
             //{
@@ -1084,28 +1086,28 @@ namespace TableEditor
         {
             DgvNumberFormat.CelLckOut = false;
 
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteTableWithXAxis);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteTableWithXAxis);
         }
 
         private void PasteTableWithYAxis_Click(object sender, EventArgs e)
         {
             DgvNumberFormat.CelLckOut = false;
 
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteTableWithYAxis);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteTableWithYAxis);
         }
 
         private void PasteTableWithNoAxis_Click(object sender, EventArgs e)
         {
             DgvNumberFormat.CelLckOut = false;
 
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteTableWithNoAxis);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteTableWithNoAxis);
 
             dgvCtrl.Refresh(RefreshMode.All);
         }
 
         private void Paste_Click(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteToCurrentCell);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteToCurrentCell);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
@@ -1128,56 +1130,56 @@ namespace TableEditor
 
         private void PasteXAxis_Click(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteXAxis);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteXAxis);
 
             dgvCtrl.Refresh(RefreshMode.All);
         }
 
         private void PasteYAxis_Click(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteYAxis);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteYAxis);
 
             dgvCtrl.Refresh(RefreshMode.All);
         }
 
         private void Paste_MultiplyByPercent(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_MultiplyByPercent);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteSpecial_MultiplyByPercent);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
 
         private void Paste_MultiplyByPercentHalf(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_MultiplyByPercentHalf);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteSpecial_MultiplyByPercentHalf);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
 
         private void Paste_DivideByPercent(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_DivideByPercent);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteSpecial_DivideByPercent);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
 
         private void Paste_DivideByPercentHalf(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_DivideByPercentHalf);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteSpecial_DivideByPercentHalf);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
 
         private void Paste_Add(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_Add);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteSpecial_Add);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
 
         private void Paste_Subtract(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteSpecial_Subtract);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteSpecial_Subtract);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
@@ -1204,7 +1206,7 @@ namespace TableEditor
 
         private void btn_Paste_Click(object sender, EventArgs e)
         {
-            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.Mode.PasteToCurrentCell);
+            dgvCtrl.paste.ParseClipboardToDgv(dgvCtrl, Paste.eMode.PasteToCurrentCell);
 
             dgvCtrl.Refresh(RefreshMode.StyleWidthSize);
         }
@@ -1943,6 +1945,7 @@ namespace TableEditor
         {
             get { return dgv.SelectedCells; }
         }
+        public bool NewTablePasted { get { return myEvents.NewTablePasted; } set { myEvents.NewTablePasted = value; } }
 
         // Options & settings
         public bool UndoEnabled { get; set; }
@@ -3185,7 +3188,7 @@ namespace TableEditor
             // true
             DgvHasData = true;
 
-            Refresh(refreshMode); // low 0.02 - 0.05s, high 0.017 - 0.19s
+            Refresh(refreshMode); 
 
             // Resume layout
             this.dgv.ResumeLayout(true);
@@ -3791,6 +3794,7 @@ namespace TableEditor
             public bool DebugMuteHighSpeed { get; set; }
             public bool DebugDbncTmr { get { return debugDbncTmr; } set { debugDbncTmr = value; tmr_DgvDataChanged_Debounced.Debug = value; tmr_SelectionChanged_Debounced.Debug = value; } }
             public bool DebugIntTmr { get { return debugIntTmr; } set { debugIntTmr = value; tmr_DgvSizeChanged_Intermittent.Debug = value; tmr_SelectionChanged_Intermittent.Debug = value; } }
+            public bool NewTablePasted { get; set; } = false;
 
             public void AssignTimerInstanceNames()
             {
@@ -4027,7 +4031,7 @@ namespace TableEditor
                 // Values
                 e.RowHeaders = dgvCtrl.ReadRowHeaders();
                 e.ColHeaders = dgvCtrl.ReadColHeaders();
-                e.TableData = dgvCtrl.ReadDataTable();
+                e.TableData  = dgvCtrl.ReadDataTable();
 
                 // Formatting
                 e.RowHeaderFormat = dgvCtrl.RowHeaderFormat;
@@ -4053,6 +4057,16 @@ namespace TableEditor
                 //{
                 //    Console.WriteLine($"{InstanceName} - {ClassName} - DgvDataChanged EventArgs built");
                 //}
+
+                switch(e.CopyPasteMode)
+                {
+                    case Paste.eMode.PasteTableWithXYAxis:
+                    case Paste.eMode.PasteTableWithXAxis:
+                    case Paste.eMode.PasteTableWithYAxis:
+                    case Paste.eMode.PasteTableWithNoAxis:
+                        NewTablePasted = true;
+                        break;
+                }
 
                 // Return with the event args
                 return e;
@@ -4284,7 +4298,7 @@ namespace TableEditor
             // will reflect the paste data change event ags
             Undo_Set(myEvents.BuildEventArgs_DgvDataChanged_Event());
 
-            // Will fire off a data changed event to trigger the grpah to re-draw
+            // Will fire off a data changed event to trigger the graph to re-draw
             myEvents.Req_DgvDataChanged_Event();
         }
         private void Undo_Completed_NDR(object sender, DgvData e)
@@ -4644,7 +4658,7 @@ namespace TableEditor
             // If ctrl + c initiate paste
             if ((Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl)) && Keyboard.IsKeyDown(Key.V))
             {
-                paste.ParseClipboardToDgv(this, Paste.Mode.PasteToCurrentCell, Paste.DataSource.ClipBoard);
+                paste.ParseClipboardToDgv(this, Paste.eMode.PasteToCurrentCell, Paste.eDataSource.ClipBoard);
             }
         }
 
@@ -6297,7 +6311,7 @@ namespace TableEditor
                 }
             }
         }
-        public int RotationTransposed
+        public int RotationTranspose
         {
             get { return rotation_Transposed; }
             set
@@ -8274,7 +8288,7 @@ namespace TableEditor
     public class DgvData
     #region
     {
-        // General purpose data class that covers off everything needed to communicate to the main and headers dgv's
+        // General purpose data class that covers off everything needed to communicate to the main dgv and header dgv's
         
         public string[] RowHeadersText { get; set; }
         public string[] ColHeadersText { get; set; }
@@ -8284,6 +8298,7 @@ namespace TableEditor
         public string RowHeaderFormat { get; set; }
         public string ColHeaderFormat { get; set; }
         public string TableDataFormat { get; set; }
+        public Paste.eMode CopyPasteMode { get; set; }
         public DgvData Empty { get { return new DgvData(); } }
 
         public DgvData() // Empty class if needed
@@ -9712,7 +9727,7 @@ namespace TableEditor
         }
 
         #region Enums
-        public enum Mode
+        public enum eMode
         {
             None,
             CopyWithAxis,
@@ -9733,7 +9748,7 @@ namespace TableEditor
             Default
         }
 
-        public enum DataSource
+        public enum eDataSource
         {
             ClipBoard,
             TextFile
@@ -9759,7 +9774,7 @@ namespace TableEditor
             public double[] ColHeaders { get; set; }
             public double[,] TableData { get; set; }
             public string ErrorText { get; set; }
-            public Mode PasteMode { get; set; }
+            public eMode PasteMode { get; set; }
 
             public void Reset()
             {
@@ -9780,7 +9795,7 @@ namespace TableEditor
                 ColHeaders = new double[0];
                 TableData = new double[0, 0];
                 ErrorText = "";
-                PasteMode = Mode.None;
+                PasteMode = eMode.None;
             }
         }
         public static MyClipboard clipboard;
@@ -9788,7 +9803,7 @@ namespace TableEditor
 
         #endregion
 
-        public void ParseClipboardToDgv(DgvCtrl dgvCtrl, Mode copyPasteMode, DataSource dataSource = DataSource.ClipBoard, string fileName = null)
+        public void ParseClipboardToDgv(DgvCtrl dgvCtrl, eMode copyPasteMode, eDataSource dataSource = eDataSource.ClipBoard, string fileName = null)
         {
             //----------------------
             // Variables 
@@ -9816,54 +9831,54 @@ namespace TableEditor
                 #region
                 switch (copyPasteMode)
                 {
-                    case Mode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXYAxis:
                         clipboard.RowHeaderPresent = true;
                         clipboard.ColHeaderPresent = true;
                         clipboard.TableDataPresent = true;
                         break;
 
-                    case Mode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithXAxis:
                         clipboard.RowHeaderPresent = false;
                         clipboard.ColHeaderPresent = true;
                         clipboard.TableDataPresent = true;
                         break;
 
-                    case Mode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithYAxis:
                         clipboard.RowHeaderPresent = true;
                         clipboard.ColHeaderPresent = false;
                         clipboard.TableDataPresent = true;
                         break;
 
-                    case Mode.PasteTableWithNoAxis:
+                    case eMode.PasteTableWithNoAxis:
                         clipboard.RowHeaderPresent = false;
                         clipboard.ColHeaderPresent = false;
                         clipboard.TableDataPresent = true;
                         break;
 
-                    case Mode.PasteToCurrentCell:
+                    case eMode.PasteToCurrentCell:
                         clipboard.RowHeaderPresent = false;
                         clipboard.ColHeaderPresent = false;
                         clipboard.TableDataPresent = true;
                         break;
 
-                    case Mode.PasteXAxis:
+                    case eMode.PasteXAxis:
                         clipboard.RowHeaderPresent = false;
                         clipboard.ColHeaderPresent = true;
                         clipboard.TableDataPresent = false;
                         break;
 
-                    case Mode.PasteYAxis:
+                    case eMode.PasteYAxis:
                         clipboard.RowHeaderPresent = true;
                         clipboard.ColHeaderPresent = false;
                         clipboard.TableDataPresent = false;
                         break;
 
-                    case Mode.PasteSpecial_MultiplyByPercent:
-                    case Mode.PasteSpecial_MultiplyByPercentHalf:
-                    case Mode.PasteSpecial_DivideByPercent:
-                    case Mode.PasteSpecial_DivideByPercentHalf:
-                    case Mode.PasteSpecial_Add:
-                    case Mode.PasteSpecial_Subtract:
+                    case eMode.PasteSpecial_MultiplyByPercent:
+                    case eMode.PasteSpecial_MultiplyByPercentHalf:
+                    case eMode.PasteSpecial_DivideByPercent:
+                    case eMode.PasteSpecial_DivideByPercentHalf:
+                    case eMode.PasteSpecial_Add:
+                    case eMode.PasteSpecial_Subtract:
                         clipboard.RowHeaderPresent = false;
                         clipboard.ColHeaderPresent = false;
                         clipboard.TableDataPresent = true;
@@ -9876,11 +9891,11 @@ namespace TableEditor
                 //----------------------
                 #region
                 // It will come from either the clipboard or a text file
-                if (dataSource == DataSource.TextFile && fileName != null)
+                if (dataSource == eDataSource.TextFile && fileName != null)
                 {
                     clipboard.RawClipboardText = File.ReadAllText(fileName);
                 }
-                else if (dataSource == DataSource.ClipBoard && System.Windows.Forms.Clipboard.ContainsData(DataFormats.Text))
+                else if (dataSource == eDataSource.ClipBoard && System.Windows.Forms.Clipboard.ContainsData(DataFormats.Text))
                 {
                     clipboard.RawClipboardText = System.Windows.Forms.Clipboard.GetText();
                 }
@@ -9941,18 +9956,18 @@ namespace TableEditor
                 // processing the array contains a neat version of the paste data that we can parse out further on.
                 switch (copyPasteMode)
                 {
-                    case Mode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXYAxis:
                         // If the last row contains only empty or null for column length - 1, then remove the last row.
                         // Similarily, we check the last column also with the same conditions
                         clipboard.RawClipboardTextArray = ProcessLastRow(clipboard.RawClipboardTextArray);
                         clipboard.RawClipboardTextArray = ProcessLastColumn(clipboard.RawClipboardTextArray);
                         break;
 
-                    case Mode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithXAxis:
                         clipboard.RawClipboardTextArray = ProcessLastColumn(clipboard.RawClipboardTextArray);
                         break;
 
-                    case Mode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithYAxis:
                         clipboard.RawClipboardTextArray = ProcessLastRow(clipboard.RawClipboardTextArray);
                         break;
                 }
@@ -9971,35 +9986,35 @@ namespace TableEditor
                 switch (copyPasteMode)
                 #region
                 {
-                    case Mode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXYAxis:
                         clipboard.RowLength = clipboard.RawClipboardTextArray.GetLength(0) - 1;
                         clipboard.ColLength = clipboard.RawClipboardTextArray.GetLength(1) - 1;
                         break;
-                    case Mode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithXAxis:
                         clipboard.RowLength = clipboard.RawClipboardTextArray.GetLength(0) - 1;
                         clipboard.ColLength = clipboard.RawClipboardTextArray.GetLength(1);
                         break;
-                    case Mode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithYAxis:
                         clipboard.RowLength = clipboard.RawClipboardTextArray.GetLength(0);
                         clipboard.ColLength = clipboard.RawClipboardTextArray.GetLength(1) - 1;
                         break;
-                    case Mode.PasteTableWithNoAxis:
-                    case Mode.PasteToCurrentCell:
-                    case Mode.PasteSpecial_MultiplyByPercent:
-                    case Mode.PasteSpecial_MultiplyByPercentHalf:
-                    case Mode.PasteSpecial_DivideByPercent:
-                    case Mode.PasteSpecial_DivideByPercentHalf:
-                    case Mode.PasteSpecial_Add:
-                    case Mode.PasteSpecial_Subtract:
+                    case eMode.PasteTableWithNoAxis:
+                    case eMode.PasteToCurrentCell:
+                    case eMode.PasteSpecial_MultiplyByPercent:
+                    case eMode.PasteSpecial_MultiplyByPercentHalf:
+                    case eMode.PasteSpecial_DivideByPercent:
+                    case eMode.PasteSpecial_DivideByPercentHalf:
+                    case eMode.PasteSpecial_Add:
+                    case eMode.PasteSpecial_Subtract:
                         // 23/08/24 fucking array bounds errors
                         //clipboard.RowLength = GetRowCountFromRawInputText(clipboard.RawClipboardText);
                         //clipboard.ColLength = GetColCountFromRawInputText(clipboard.RawClipboardText);
                         break;
 
-                    case Mode.PasteXAxis:
+                    case eMode.PasteXAxis:
                         // Do nothing, this was handled in the 'Convert into rows and columns' section earlier
                         break;
-                    case Mode.PasteYAxis:
+                    case eMode.PasteYAxis:
                         // Do nothing, this was handled in the 'Convert into rows and columns' section earlier
                         break;
                 }
@@ -10037,9 +10052,9 @@ namespace TableEditor
 
                 switch (copyPasteMode)
                 {
-                    case Mode.PasteTableWithXYAxis:
-                    case Mode.PasteTableWithXAxis:
-                    case Mode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithYAxis:
                         // We must have at least 2 rows and 2 columns to continue processing the clipboard
                         if (clipboard.RowLength < 1 || clipboard.ColLength < 1)
                         {
@@ -10049,14 +10064,14 @@ namespace TableEditor
                         }
                         break;
 
-                    case Mode.PasteTableWithNoAxis:
-                    case Mode.PasteToCurrentCell:
-                    case Mode.PasteSpecial_MultiplyByPercent:
-                    case Mode.PasteSpecial_MultiplyByPercentHalf:
-                    case Mode.PasteSpecial_DivideByPercent:
-                    case Mode.PasteSpecial_DivideByPercentHalf:
-                    case Mode.PasteSpecial_Add:
-                    case Mode.PasteSpecial_Subtract:
+                    case eMode.PasteTableWithNoAxis:
+                    case eMode.PasteToCurrentCell:
+                    case eMode.PasteSpecial_MultiplyByPercent:
+                    case eMode.PasteSpecial_MultiplyByPercentHalf:
+                    case eMode.PasteSpecial_DivideByPercent:
+                    case eMode.PasteSpecial_DivideByPercentHalf:
+                    case eMode.PasteSpecial_Add:
+                    case eMode.PasteSpecial_Subtract:
                         // We must have at least 1 row and 1 column to continue processing the clipboard
                         if (clipboard.RowLength < 1 || clipboard.ColLength < 1)
                         {
@@ -10066,7 +10081,7 @@ namespace TableEditor
                         }
                         break;
 
-                    case Mode.PasteXAxis:
+                    case eMode.PasteXAxis:
                         // If pasting axis, they must be the same length as the dgv
                         if (clipboard.ColLength != dt.Columns.Count)
                         {
@@ -10077,7 +10092,7 @@ namespace TableEditor
 
                         break;
 
-                    case Mode.PasteYAxis:
+                    case eMode.PasteYAxis:
                         // If pasting axis, they must be the same length as the dgv
                         if (clipboard.RowLength != dt.Rows.Count)
                         {
@@ -10186,7 +10201,7 @@ namespace TableEditor
                 // from pcmtec the data comes in 1 column with multiple rows. For pcmtec, the data is passed on as is.
                 // For HP we need to re-dimension the row array and transpose the columns to the rows. For each case the
                 // incoming array dimension are checked against the existing data table row length as they must match
-                if (copyPasteMode == Mode.PasteYAxis)
+                if (copyPasteMode == eMode.PasteYAxis)
                 {
                     bool sourceIsHP = false;
 
@@ -10241,19 +10256,19 @@ namespace TableEditor
                 #region
                 switch (copyPasteMode)
                 {
-                    case Mode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXYAxis:
                         clipboard.TableData = new double[clipboard.RowLength, clipboard.ColLength];
                         break;
 
-                    case Mode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithXAxis:
                         clipboard.TableData = new double[clipboard.RowLength, clipboard.ColLength];
                         break;
 
-                    case Mode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithYAxis:
                         clipboard.TableData = new double[clipboard.RowLength, clipboard.ColLength];
                         break;
 
-                    case Mode.PasteTableWithNoAxis:
+                    case eMode.PasteTableWithNoAxis:
                         clipboard.RowHeadersText = new string[clipboard.RowLength];
                         clipboard.ColHeadersText = new string[clipboard.ColLength];
                         clipboard.RowHeaders = new double[clipboard.RowLength];
@@ -10261,15 +10276,15 @@ namespace TableEditor
                         clipboard.TableData = new double[clipboard.RowLength, clipboard.ColLength];
                         break;
 
-                    case Mode.PasteXAxis:
-                    case Mode.PasteYAxis:
-                    case Mode.PasteToCurrentCell:
-                    case Mode.PasteSpecial_MultiplyByPercent:
-                    case Mode.PasteSpecial_MultiplyByPercentHalf:
-                    case Mode.PasteSpecial_DivideByPercent:
-                    case Mode.PasteSpecial_DivideByPercentHalf:
-                    case Mode.PasteSpecial_Add:
-                    case Mode.PasteSpecial_Subtract:
+                    case eMode.PasteXAxis:
+                    case eMode.PasteYAxis:
+                    case eMode.PasteToCurrentCell:
+                    case eMode.PasteSpecial_MultiplyByPercent:
+                    case eMode.PasteSpecial_MultiplyByPercentHalf:
+                    case eMode.PasteSpecial_DivideByPercent:
+                    case eMode.PasteSpecial_DivideByPercentHalf:
+                    case eMode.PasteSpecial_Add:
+                    case eMode.PasteSpecial_Subtract:
                         clipboard.TableData = new double[clipboard.RowLength, clipboard.ColLength];
                         break;
                 }
@@ -10281,7 +10296,7 @@ namespace TableEditor
                 #region
                 switch (copyPasteMode)
                 {
-                    case Mode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXYAxis:
                         #region
                         for (i = 0; i < clipboard.RowLength; i++)
                         {
@@ -10300,7 +10315,7 @@ namespace TableEditor
                         break;
                     #endregion
 
-                    case Mode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithXAxis:
                         #region
                         // Create token column headers
                         clipboard.RowHeaders = new double[clipboard.RowLength];
@@ -10331,7 +10346,7 @@ namespace TableEditor
                         break;
                     #endregion
 
-                    case Mode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithYAxis:
                         #region
                         clipboard.ColHeaders = new double[clipboard.ColLength];
                         clipboard.ColHeadersText = new string[clipboard.ColLength];
@@ -10361,7 +10376,7 @@ namespace TableEditor
                         break;
                     #endregion
 
-                    case Mode.PasteTableWithNoAxis:
+                    case eMode.PasteTableWithNoAxis:
                         #region
                         // Create new token labels
                         for (i = 0; i < clipboard.RowLength; i++)
@@ -10404,10 +10419,10 @@ namespace TableEditor
                 switch (copyPasteMode)
                 {
                     // Creates a new table
-                    case Mode.PasteTableWithXYAxis:
-                    case Mode.PasteTableWithXAxis:
-                    case Mode.PasteTableWithYAxis:
-                    case Mode.PasteTableWithNoAxis:
+                    case eMode.PasteTableWithXYAxis:
+                    case eMode.PasteTableWithXAxis:
+                    case eMode.PasteTableWithYAxis:
+                    case eMode.PasteTableWithNoAxis:
                         #region
                         // Write to data grid view then exit
                         dgvCtrl.WriteToDataGridView(clipboard.RowHeaders, clipboard.ColHeaders, clipboard.TableData);
@@ -10415,13 +10430,13 @@ namespace TableEditor
                         clipboard.HeadersChanged = true;
 
                         if (Debug)
-                            Console.WriteLine($"{InstanceName} - {ClassName} - {Enum.GetName(typeof(Mode), copyPasteMode)}");
+                            Console.WriteLine($"{InstanceName} - {ClassName} - {Enum.GetName(typeof(eMode), copyPasteMode)}");
 
                         break;
                     #endregion
 
                     // Works with existing table and redimensions if required
-                    case Mode.PasteXAxis:
+                    case eMode.PasteXAxis:
                         #region
                         dgvCtrl.ReDimensionDataTable_v2(dt.Rows.Count, clipboard.ColHeaders.Length);
                         dgvCtrl.WriteColHeaderLabels(clipboard.ColHeaders);
@@ -10429,12 +10444,12 @@ namespace TableEditor
                         clipboard.HeadersChanged = true;
 
                         if (Debug)
-                            Console.WriteLine($"{InstanceName} - {ClassName} - {Enum.GetName(typeof(Mode), copyPasteMode)}");
+                            Console.WriteLine($"{InstanceName} - {ClassName} - {Enum.GetName(typeof(eMode), copyPasteMode)}");
 
                         break;
                     #endregion
 
-                    case Mode.PasteYAxis:
+                    case eMode.PasteYAxis:
                         #region
                         dgvCtrl.ReDimensionDataTable_v2(clipboard.RowHeaders.Length, dt.Columns.Count);
                         dgvCtrl.WriteRowHeaderLabels(clipboard.RowHeaders);
@@ -10442,19 +10457,19 @@ namespace TableEditor
                         clipboard.HeadersChanged = true;
 
                         if (Debug)
-                            Console.WriteLine($"{InstanceName} - {ClassName} - {Enum.GetName(typeof(Mode), copyPasteMode)}");
+                            Console.WriteLine($"{InstanceName} - {ClassName} - {Enum.GetName(typeof(eMode), copyPasteMode)}");
 
                         break;
                     #endregion
 
                     // Works with existing table
-                    case Mode.PasteToCurrentCell:
-                    case Mode.PasteSpecial_MultiplyByPercent:
-                    case Mode.PasteSpecial_MultiplyByPercentHalf:
-                    case Mode.PasteSpecial_DivideByPercent:
-                    case Mode.PasteSpecial_DivideByPercentHalf:
-                    case Mode.PasteSpecial_Add:
-                    case Mode.PasteSpecial_Subtract:
+                    case eMode.PasteToCurrentCell:
+                    case eMode.PasteSpecial_MultiplyByPercent:
+                    case eMode.PasteSpecial_MultiplyByPercentHalf:
+                    case eMode.PasteSpecial_DivideByPercent:
+                    case eMode.PasteSpecial_DivideByPercentHalf:
+                    case eMode.PasteSpecial_Add:
+                    case eMode.PasteSpecial_Subtract:
                         #region
 
                         // Copy the dt 
@@ -10511,31 +10526,31 @@ namespace TableEditor
                                 {
                                     switch (copyPasteMode)
                                     {
-                                        case Mode.PasteToCurrentCell:
+                                        case eMode.PasteToCurrentCell:
                                             dgvDataTable[i, j] = clipboard.TableData[m, n];
                                             break;
 
-                                        case Mode.PasteSpecial_MultiplyByPercent:
+                                        case eMode.PasteSpecial_MultiplyByPercent:
                                             dgvDataTable[i, j] = MultiplyByPercent(1.0, dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
 
-                                        case Mode.PasteSpecial_MultiplyByPercentHalf:
+                                        case eMode.PasteSpecial_MultiplyByPercentHalf:
                                             dgvDataTable[i, j] = MultiplyByPercent(0.5, dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
 
-                                        case Mode.PasteSpecial_DivideByPercent:
+                                        case eMode.PasteSpecial_DivideByPercent:
                                             dgvDataTable[i, j] = DivideByPercent(1.0, dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
 
-                                        case Mode.PasteSpecial_DivideByPercentHalf:
+                                        case eMode.PasteSpecial_DivideByPercentHalf:
                                             dgvDataTable[i, j] = DivideByPercent(0.5, dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
 
-                                        case Mode.PasteSpecial_Add:
+                                        case eMode.PasteSpecial_Add:
                                             dgvDataTable[i, j] = Add(dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
 
-                                        case Mode.PasteSpecial_Subtract:
+                                        case eMode.PasteSpecial_Subtract:
                                             dgvDataTable[i, j] = Subtract(dgvDataTable[i, j], clipboard.TableData[m, n]);
                                             break;
                                     }
@@ -10591,13 +10606,14 @@ namespace TableEditor
             {
                 DgvData e = new DgvData
                 {
-                    RowHeadersText = clipboard.RowHeadersText,
-                    ColHeadersText = clipboard.ColHeadersText,
-                    RowHeaders = clipboard.RowHeaders,
-                    ColHeaders = clipboard.ColHeaders,
-                    TableData = clipboard.TableData,
+                    RowHeadersText  = clipboard.RowHeadersText,
+                    ColHeadersText  = clipboard.ColHeadersText,
+                    RowHeaders      = clipboard.RowHeaders,
+                    ColHeaders      = clipboard.ColHeaders,
+                    TableData       = clipboard.TableData,
                     RowHeaderFormat = dgvCtrl.RowHeaderFormat,
-                    ColHeaderFormat = dgvCtrl.ColHeaderFormat
+                    ColHeaderFormat = dgvCtrl.ColHeaderFormat,
+                    CopyPasteMode   = copyPasteMode
                 };
                 e.FormatHeaderText();
 

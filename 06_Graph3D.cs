@@ -3235,7 +3235,7 @@ namespace Plot3D
                 mf_LineWidth = (float)(ms32_OrgWidth * mi_Inst.mi_Transform.md_Zoom);
 
                 // Diameter of circle for selected points
-                mf_SelSize = (float)(Math.Max(6, ms32_OrgWidth * 2) * mi_Inst.mi_Transform.md_Zoom);
+                mf_SelSize = (float)(Math.Max(6, ms32_OrgWidth * 2) * mi_Inst.mi_Transform.md_Zoom) * Editor3D.mf_SelSizeK; // np
 
                 mb_IsValid = true;
                 for (int i=0; i<mi_Points.Length; i++)
@@ -3292,7 +3292,7 @@ namespace Plot3D
                 {
                     if (!i_Point.mi_P3D.Selected)
                         continue;
-                    
+
                     float X = (float)i_Point.mi_P2D.md_X - mf_SelSize / 2.0f;
                     float Y = (float)i_Point.mi_P2D.md_Y - mf_SelSize / 2.0f;
                     i_Graph.FillEllipse(mi_Inst.mi_Selection.HighlightBrush, X, Y, mf_SelSize, mf_SelSize); // np, selected point drawn here
