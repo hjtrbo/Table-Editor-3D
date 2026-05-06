@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug (Table Editor 3D)",
+            "type": "clr",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/Debug/TableEditor3D.exe",
+            "preLaunchTask": "build"
+        }
+    ]
+}

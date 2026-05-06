@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -12,6 +12,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <LangVersion>10</LangVersion>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -32,6 +33,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -78,52 +80,122 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="02_Graph3D_Instructions.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="02_Graph3D_Instructions.Designer.cs">
-      <DependentUpon>02_Graph3D_Instructions.cs</DependentUpon>
-    </Compile>
-    <Compile Include="04_AverageTool.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="04_AverageTool.Designer.cs">
-      <DependentUpon>04_AverageTool.cs</DependentUpon>
-    </Compile>
+    <!-- Entry point -->
+    <Compile Include="Program.cs" />
+    <!-- Off-limits vendored 3D engine -->
     <Compile Include="06_Graph3D.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Demo.cs">
+    <!-- Demo host application -->
+    <Compile Include="Table Editor 3D.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Demo.Designer.cs">
-      <DependentUpon>Demo.cs</DependentUpon>
+    <Compile Include="Table Editor 3D.Designer.cs">
+      <DependentUpon>Table Editor 3D.cs</DependentUpon>
     </Compile>
-    <Compile Include="01_TableEditor3D.cs">
+    <!-- Controls: the main UserControl (3 partial files + designer) -->
+    <Compile Include="Controls\TableEditor3D.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="01_TableEditor3D.Designer.cs">
-      <DependentUpon>01_TableEditor3D.cs</DependentUpon>
+    <Compile Include="Controls\TableEditor3D.Designer.cs">
+      <DependentUpon>TableEditor3D.cs</DependentUpon>
     </Compile>
-    <Compile Include="00_Program.cs" />
-    <Compile Include="03_UserSettingsDialog.cs">
+    <Compile Include="Controls\TableEditor3D.Toolbar.cs">
+      <DependentUpon>TableEditor3D.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TableEditor3D.Events.cs">
+      <DependentUpon>TableEditor3D.cs</DependentUpon>
+      <SubType>UserControl</SubType>
+    </Compile>
+    <!-- DataGrid subsystem -->
+    <Compile Include="DataGrid\CellColorizer.cs" />
+    <Compile Include="DataGrid\DgvCtrl.cs" />
+    <Compile Include="DataGrid\DgvData.cs" />
+    <Compile Include="DataGrid\DgvEvents.cs" />
+    <Compile Include="DataGrid\DgvNumFormat.cs" />
+    <Compile Include="DataGrid\IncDec.cs" />
+    <!-- Graph3D subsystem -->
+    <Compile Include="Graph3D\DgvToGraph3d.cs" />
+    <Compile Include="Graph3D\Graph3dCtrl.cs" />
+    <Compile Include="Graph3D\MyPoint.cs" />
+    <Compile Include="Graph3D\MyPoints.cs" />
+    <!-- Layout subsystem -->
+    <Compile Include="Layout\DgvHeadersCtrl.cs" />
+    <Compile Include="Layout\LayoutControls.cs" />
+    <Compile Include="Layout\ScrollBarCtrl.cs" />
+    <!-- Clipboard subsystem -->
+    <Compile Include="Clipboard\Copy.cs" />
+    <Compile Include="Clipboard\MyClipboard.cs" />
+    <Compile Include="Clipboard\Paste.cs" />
+    <!-- Math subsystem -->
+    <Compile Include="Math\Interpolate.cs" />
+    <Compile Include="Math\SelectionWalker.cs" />
+    <Compile Include="Math\Smooth.cs" />
+    <Compile Include="Math\WalkMode.cs" />
+    <!-- Undo/Redo subsystem -->
+    <Compile Include="UndoRedo\Redo.cs" />
+    <Compile Include="UndoRedo\Undo.cs" />
+    <!-- Common utilities -->
+    <Compile Include="Common\Enums.cs" />
+    <Compile Include="Common\Globals.cs" />
+    <Compile Include="Common\Init.cs" />
+    <Compile Include="Common\Logger.cs" />
+    <Compile Include="Common\NumberFormatter.cs" />
+    <Compile Include="Common\SampleData.cs" />
+    <Compile Include="Common\TraceCategories.cs" />
+    <Compile Include="Common\Utils.cs" />
+    <!-- Settings service -->
+    <Compile Include="Settings\ISettings.cs" />
+    <Compile Include="Settings\SettingsService.cs" />
+    <!-- Support forms -->
+    <Compile Include="Forms\AverageTool.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="03_UserSettingsDialog.Designer.cs">
-      <DependentUpon>03_UserSettingsDialog.cs</DependentUpon>
+    <Compile Include="Forms\AverageTool.Designer.cs">
+      <DependentUpon>AverageTool.cs</DependentUpon>
     </Compile>
-    <Compile Include="05_Pcmtec_X_Axis.cs">
+    <Compile Include="Forms\Graph3DInstructionsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="05_Pcmtec_X_Axis.Designer.cs">
-      <DependentUpon>05_Pcmtec_X_Axis.cs</DependentUpon>
+    <Compile Include="Forms\Graph3DInstructionsDialog.Designer.cs">
+      <DependentUpon>Graph3DInstructionsDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\PasteWithXAxisPcmtecDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\PasteWithXAxisPcmtecDialog.Designer.cs">
+      <DependentUpon>PasteWithXAxisPcmtecDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\UserSettingsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\UserSettingsDialog.Designer.cs">
+      <DependentUpon>UserSettingsDialog.cs</DependentUpon>
+    </Compile>
+    <!-- Timers subsystem -->
+    <Compile Include="Timers\MyStopWatch.cs" />
+    <Compile Include="Timers\TimerOffDelay.cs" />
+    <Compile Include="Timers\TimerOnDelay.cs" />
+    <!-- MicroLibrary subsystem -->
+    <Compile Include="MicroLibrary\MicroStopwatch.cs" />
+    <Compile Include="MicroLibrary\MicroTimer.cs" />
+    <Compile Include="MicroLibrary\MicroTimerEventArgs.cs" />
+    <!-- Generated/auto-gen files -->
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Embedded resources for forms (resx files stay in root for designer compatibility) -->
     <EmbeddedResource Include="01_TableEditor3D.resx">
       <DependentUpon>01_TableEditor3D.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -140,19 +212,14 @@
     <EmbeddedResource Include="05_Pcmtec_X_Axis.resx">
       <DependentUpon>05_Pcmtec_X_Axis.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Demo.resx">
-      <DependentUpon>Demo.cs</DependentUpon>
+    <EmbeddedResource Include="Table Editor 3D.resx">
+      <DependentUpon>Table Editor 3D.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

@@ -1,4 +1,4 @@
-﻿﻿using System;
+using System;
 using System.Windows.Forms;
 
 namespace TableEditor;
@@ -10,6 +10,6 @@ internal static class Program
     {
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
-        Application.Run(new Demo());
+        Application.Run(new App());
     }
 }

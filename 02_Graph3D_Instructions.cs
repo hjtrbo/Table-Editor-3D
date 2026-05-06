@@ -1,20 +1,19 @@
-﻿using System.Windows.Forms;
+﻿﻿using System.Windows.Forms;
 
-namespace TableEditor
+namespace TableEditor;
+
+public partial class Graph3D_Instructions : Form
 {
-    public partial class Graph3D_Instructions : Form
+    public bool DeselectAllText
     {
-        public bool DeselectAllText
-        {
-            set { textBox1.DeselectAll(); }
-        }
-
-
-        public Graph3D_Instructions()
-        {
-            InitializeComponent();
-        }
-
-
+        set { textBox1.DeselectAll(); }
     }
+
+
+    public Graph3D_Instructions()
+    {
+        InitializeComponent();
+    }
+
+
 }
