@@ -1,8 +1,6 @@
 # Table-Editor-3D
 A c# winforms user control 3d map editor designed to accompany tuning software that lack 3d graph support.
 
-Includes an average tool that takes input from multiple data logs and averages an output weighted to the total number of sample points. 
-
 Functions and features are similar to that of HP Tuners I.e. Paste special, Map smoothing, Map interpolation
 
 2-way visual indication of cursor location. This can be turned on / off in the settings menu
