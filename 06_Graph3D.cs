@@ -57,14 +57,14 @@ NAMING CONVENTIONS which allow to see the type of a variable immediately without
 #endif
 
 using System;
-using System.Text;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.ComponentModel;
-using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using System.Windows.Forms;
-using System.Diagnostics;
 using TableEditor;
 
 namespace Plot3D

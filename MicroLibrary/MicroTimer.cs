@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -135,16 +134,6 @@ public class MicroTimer
         }
 
         return threadTimer.Join(timeoutInMilliSec);
-    }
-
-    public void Abort()
-    {
-        stopTimer = true;
-
-        if (Enabled)
-        {
-            threadTimer.Abort();
-        }
     }
 
     // Core notification loop. Runs entirely on the timer thread. SpinWait is intentional:

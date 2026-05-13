@@ -1,6 +1,5 @@
 using System;
 using System.Drawing;
-using Plot3D.Properties;
 
 namespace TableEditor.Settings;
 

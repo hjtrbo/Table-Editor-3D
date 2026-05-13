@@ -1,7 +1,6 @@
-﻿﻿using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using TableEditor;
 using TableEditor.DataGrid;
 using Timers;
 
@@ -109,6 +108,7 @@ public class ScrollBarCtrl
         scrlBrDgvMvTmr = new TimerOffDelay
         {
             Preset          = 50,
+            UiControl       = dgvCtrl.dgv,
             OnTimingDone    = DgvMove_TimerOff_Tick,
             DebugTimerName  = "scrlBrDgvMvTmr",
             Debug           = DebugPosition

@@ -1,10 +1,4 @@
-using System;
-using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Linq;
-using TableEditor;
 using TableEditor.Clipboard;
 
 namespace TableEditor.DataGrid;

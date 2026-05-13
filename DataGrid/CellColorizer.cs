@@ -1,9 +1,6 @@
-﻿﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Collections.Generic;
-using TableEditor;
 
 
 namespace TableEditor.DataGrid;

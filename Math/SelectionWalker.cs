@@ -1,8 +1,5 @@
-using System;
-using System.Windows.Forms;
 using System.Collections.Generic;
-using System.Linq;
-using TableEditor.DataGrid;
+using System.Windows.Forms;
 
 namespace TableEditor.Math;
 

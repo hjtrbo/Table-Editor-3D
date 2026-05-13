@@ -12169,10 +12169,7 @@ public class TimerOnDelay
             Accumulator = 0;
             AutoStop_CountsToGo = 0;
 
-            // This must be the last line in the stop function as it kills the microtimer timer thread which happens
-            // to be this thread also!!!
             microTimer.Stop();
-            microTimer.Abort();
         }
     }
 
@@ -12390,10 +12387,9 @@ public class TimerOffDelay
         }
     }
 
-    // Aborts the timer task
     public void Stop()
     {
-        taskTimer.Abort();
+        taskTimer.Stop();
 
         stopWatch.Stop();
 
@@ -12633,16 +12629,6 @@ public class MicroTimer
         }
 
         return _threadTimer.Join(timeoutInMilliSec);
-    }
-
-    public void Abort()
-    {
-        _stopTimer = true;
-
-        if (Enabled)
-        {
-            _threadTimer.Abort();
-        }
     }
 
     void NotificationTimer(ref long timerIntervalInMicroSec,

@@ -1,43 +1,20 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using System.ComponentModel;
 using TableEditor.DataGrid;
+using TableEditor.Forms;
 using TableEditor.Graph3D;
 using TableEditor.Layout;
 using TableEditor.Settings;
-using TableEditor.Forms;
-using TableEditor.Clipboard;
-using TableEditor.UndoRedo;
-using Timers;
-using MicroLibrary;
 
 // Plot3D
-using Plot3D;
 
 // Plot3D class aliases
-using cColorScheme = Plot3D.Editor3D.cColorScheme;
-using cObject3D    = Plot3D.Editor3D.cObject3D;
-using cPoint3D     = Plot3D.Editor3D.cPoint3D;
-using cSurfaceData = Plot3D.Editor3D.cSurfaceData;
-using eColorScheme = Plot3D.Editor3D.eColorScheme;
-using eInvalidate  = Plot3D.Editor3D.eInvalidate;
-using eLegendPos   = Plot3D.Editor3D.eLegendPos;
-using eMouseCtrl   = Plot3D.Editor3D.eMouseCtrl;
-using eNormalize   = Plot3D.Editor3D.eNormalize;
-using ePolygonMode = Plot3D.Editor3D.ePolygonMode;
-using eRaster      = Plot3D.Editor3D.eRaster;
-using eSelEvent    = Plot3D.Editor3D.eSelEvent;
-using eSelType     = Plot3D.Editor3D.eSelType;
-using eTooltip     = Plot3D.Editor3D.eTooltip;
 
 // Keyboard
-using Key      = System.Windows.Input.Key;
-using Keyboard = System.Windows.Input.Keyboard;
 
 // Graph3D type aliases (types moved to TableEditor.Graph3D namespace)
-using MyPoint  = TableEditor.Graph3D.MyPoint;
-using MyPoints = TableEditor.Graph3D.MyPoints;
 
 namespace TableEditor;
 

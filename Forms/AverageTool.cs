@@ -2,8 +2,8 @@
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using TableEditor.DataGrid;
 using TableEditor.Clipboard;
+using TableEditor.DataGrid;
 
 namespace TableEditor.Forms;
 

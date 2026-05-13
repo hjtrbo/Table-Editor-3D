@@ -1,6 +1,6 @@
+using MicroLibrary;
 using System;
 using System.Windows.Forms;
-using MicroLibrary;
 
 namespace Timers;
 
@@ -193,10 +193,7 @@ public class TimerOnDelay
             Accumulator = 0;
             AutoStop_CountsToGo = 0;
 
-            // Must be the last line: kills the microTimer thread, which is this thread when called
-            // from the timer callback.
             microTimer.Stop();
-            microTimer.Abort();
         }
     }
 

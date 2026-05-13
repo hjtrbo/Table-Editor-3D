@@ -1,5 +1,3 @@
-using System;
-
 namespace TableEditor;
 
 // Controls whether copy, paste, or both clipboard operations are available on a table instance.

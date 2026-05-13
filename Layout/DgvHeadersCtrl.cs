@@ -2,12 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using TableEditor;
 using TableEditor.DataGrid;
-using Key      = System.Windows.Input.Key;
+using Key = System.Windows.Input.Key;
 using Keyboard = System.Windows.Input.Keyboard;
 
 namespace TableEditor.Layout;
+
+// Controls how much of the floating-header state is re-synced with the main DGV geometry.
+// Individual callers can request only the dimensions they know have changed.
+[Flags]
+public enum SyncScope
+{
+    ColumnWidths = 1,  // Column widths inside the column-header DGV
+    RowHeights   = 2,  // Row heights inside the row-header DGV
+    Geometry     = 4,  // Control positions, total widths, blanking-panel size
+    All          = 7
+}
 
 // Manages the two "frozen header" DataGridViews (row header and column header) that float on top of
 // the main DGV to simulate the locked-row / locked-column behaviour found in spreadsheet apps.
@@ -32,6 +42,8 @@ public class DgvHeadersCtrl
     public bool vScrollInProgress { set { vScroll_Scrolled(dgvRowHeader, ScrollEventArgs); } }
 
     // Convenience properties so callers don't have to reach into dgvCtrl.dgv directly.
+    // RowHeight = row height + 1px overlap with the blanking panel (by design).
+    // ColWidth  = row-header width - 1px overlap with the row header (by design).
     public int RowHeight { get { return dgvCtrl.dgv.Rows[0].Height + 1; } }
     public int ColWidth  { get { return dgvCtrl.dgv.RowHeadersWidth - 1; } }
 
@@ -63,6 +75,14 @@ public class DgvHeadersCtrl
     // Drives the DgvStyleOverrides overload that handles rows, columns, or both.
     enum Target { Both, Rows, Columns }
 
+    // -------------------------Layout constants -----------------------------------------------------------------------------------
+
+    // Column-header DGV height: 1px taller than ColumnHeadersHeight — intentional 1px overlap.
+    private int ColHeaderHeight => dgvCtrl.dgv.Rows.Count > 0 ? dgvCtrl.dgv.Rows[0].Height + 3 : 0;
+
+    // Blanking-panel size always matches the row-header column plus the native column-header row.
+    private Size BlankingPanelSz => new Size(dgvCtrl.dgv.RowHeadersWidth + 1, dgvCtrl.dgv.ColumnHeadersHeight + 1);
+
     // -------------------------Constructor ----------------------------------------------------------------------------------------
 
     public DgvHeadersCtrl(DgvCtrl dgvCtrl, string instanceName)
@@ -90,6 +110,28 @@ public class DgvHeadersCtrl
         dgvRowHeader.CellClick                       += RowHeader_CellClick;
         dgvColHeader.CellClick                       += ColHeader_CellClick;
         splitContainer.Resize                        += SplitContainer_Resize;
+    }
+
+    // -------------------------Dispose --------------------------------------------------------------------------------------------
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            dgvCtrl.myEvents.DgvSizeChanged_Intermittent -= MyEvents_SizeChanged_Intermittent;
+            dgvCtrl.myEvents.DgvDataChangedToHeaders     -= MyEvents_DgvDataChanged_ToHeaders_Event;
+            blankingPanel.Click                          -= BlankingPanel_Click;
+            dgvCtrl.dgv.Move                             -= Dgv_Move;
+            dgvRowHeader.CellClick                       -= RowHeader_CellClick;
+            dgvColHeader.CellClick                       -= ColHeader_CellClick;
+            splitContainer.Resize                        -= SplitContainer_Resize;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
     // -------------------------Functions ------------------------------------------------------------------------------------------
@@ -201,9 +243,12 @@ public class DgvHeadersCtrl
         if (!Keyboard.IsKeyDown(Key.LeftCtrl) && !Keyboard.IsKeyDown(Key.RightCtrl))
             dgvCtrl.dgv.ClearSelection();
 
-        // Toggle: deselect the column if already selected.
+        // Toggle: deselect the column if already selected (mirror of RowHeader_CellClick behaviour).
         if (selectedCols.Contains(e.ColumnIndex))
         {
+            for (int i = 0; i < dgvCtrl.dgv.Rows.Count; i++)
+                dgvCtrl.dgv.Rows[i].Cells[e.ColumnIndex].Selected = false;
+
             selectedCols.Remove(e.ColumnIndex);
             return;
         }
@@ -225,16 +270,21 @@ public class DgvHeadersCtrl
 
     private void SplitContainer_Resize(object sender, EventArgs e)
     {
+        if (!HasContent()) return;
+
         // Reposition floating headers to stay aligned with the main DGV after a container resize.
         // The main DGV's own Location.Y/X offset is included so the header tracks correctly when
         // the table is partially scrolled at the moment of resize.
-        dgvRowHeader.Location = new Point(0,        dgvCtrl.dgv.Rows[0].Height + 1 + dgvCtrl.dgv.Location.Y);
-        dgvColHeader.Location = new Point(dgvCtrl.dgv.RowHeadersWidth - 1 + dgvCtrl.dgv.Location.X, 0);
+        dgvRowHeader.Location = new Point(0,        RowHeight + dgvCtrl.dgv.Location.Y);
+        dgvColHeader.Location = new Point(ColWidth + dgvCtrl.dgv.Location.X, 0);
+
+        // Re-sync widths and heights in case container resize affected the visible area.
+        SyncFromMainDgv(SyncScope.Geometry | SyncScope.ColumnWidths | SyncScope.RowHeights);
     }
 
     // -------------------------Header layout --------------------------------------------------------------------------------------
 
-    private void HideHeaders()
+    public void HideHeaders()
     {
         dgvRowHeader.Hide();
         dgvColHeader.Hide();
@@ -378,7 +428,7 @@ public class DgvHeadersCtrl
             hdrDgv.Columns[0].Width = dgvCtrl.dgv.RowHeadersWidth;
             hdrDgv.Width            = dgvCtrl.dgv.RowHeadersWidth + 1;
             hdrDgv.Height           = dgvCtrl.dgv.Height - dgvCtrl.dgv.Rows[0].Height - 1;
-            hdrDgv.Location         = new Point(0, dgvCtrl.dgv.Rows[0].Height + 1);
+            hdrDgv.Location         = new Point(0, RowHeight);
             hdrDgv.DefaultCellStyle.Format = dgvCtrl.dgv.RowHeadersDefaultCellStyle.Format;
         }
 
@@ -387,8 +437,8 @@ public class DgvHeadersCtrl
             // Column header runs horizontally across the top of the main DGV, offset rightward by the
             // row-header width to leave room for the blanking panel in the corner.
             hdrDgv.Width    = dgvCtrl.dgv.Width - dgvCtrl.dgv.RowHeadersWidth;
-            hdrDgv.Height   = dgvCtrl.dgv.Rows[0].Height + 3;
-            hdrDgv.Location = new Point(dgvCtrl.dgv.RowHeadersWidth - 1, 0);
+            hdrDgv.Height   = ColHeaderHeight;
+            hdrDgv.Location = new Point(ColWidth, 0);
             hdrDgv.DefaultCellStyle.Format = dgvCtrl.dgv.ColumnHeadersDefaultCellStyle.Format;
 
             // Match each column's width to the main DGV so values line up under their headers.
@@ -403,58 +453,56 @@ public class DgvHeadersCtrl
     private void PanelStyleOverrides(Panel blankingPlate)
     {
         blankingPlate.Location    = new Point(0, 0);
-        blankingPlate.Size        = new Size(dgvCtrl.dgv.RowHeadersWidth + 1, dgvCtrl.dgv.ColumnHeadersHeight + 1);
+        blankingPlate.Size        = BlankingPanelSz;
         blankingPlate.BackColor   = backColour;
         blankingPlate.BorderStyle = BorderStyle.FixedSingle;
     }
 
     // -------------------------Header sync ----------------------------------------------------------------------------------------
 
-    // Re-applies the main DGV's current layout to the floating column-header DGV and blanking panel.
-    // Column widths, the DGV's X position, the DGV's total width, and the blanking panel width are
-    // all derived from dgv.RowHeadersWidth — which is only correct after SetCellWidths() has measured
-    // the actual header text. Calling this after SetCellWidths() ensures headers with wide text labels
-    // (e.g. "1st Gear") don't leave the column header DGV positioned at a stale narrower offset.
-    public void SyncColHeaderWidths()
+    // True when both header DGVs and the main DGV have at least one row and one column.
+    // Used to short-circuit sync operations that would throw on empty DGVs.
+    private bool HasContent() =>
+        dgvRowHeader.Rows.Count    > 0 && dgvRowHeader.Columns.Count > 0 &&
+        dgvColHeader.Rows.Count    > 0 && dgvColHeader.Columns.Count > 0 &&
+        dgvCtrl.dgv.Rows.Count     > 0 && dgvCtrl.dgv.Columns.Count  > 0;
+
+    // Positions and sizes the two floating header DGVs and the blanking panel to match the
+    // main DGV's current RowHeadersWidth, ColumnHeadersHeight, and total Width.
+    private void SyncGeometry()
     {
-        if (dgvColHeader.Rows.Count == 0 || dgvColHeader.Columns.Count == 0)
-            return;
-
-        int colWidth    = dgvCtrl.dgv.Columns.Count > 0 ? dgvCtrl.dgv.Columns[0].Width : 0;
-        int rowHdrWidth = dgvCtrl.dgv.RowHeadersWidth;
-        if (colWidth <= 0 || rowHdrWidth <= 0)
-            return;
-
-        foreach (DataGridViewColumn col in dgvColHeader.Columns)
-            col.Width = colWidth;
-
-        dgvColHeader.Location = new Point(rowHdrWidth - 1, 0);
-        dgvColHeader.Width    = dgvCtrl.dgv.Width - rowHdrWidth;
-
-        blankingPanel.Size = new Size(rowHdrWidth + 1, dgvCtrl.dgv.ColumnHeadersHeight + 1);
+        dgvColHeader.Location        = new Point(ColWidth, 0);
+        dgvColHeader.Width           = dgvCtrl.dgv.Width - dgvCtrl.dgv.RowHeadersWidth;
+        dgvRowHeader.Columns[0].Width = dgvCtrl.dgv.RowHeadersWidth;
+        dgvRowHeader.Width            = dgvCtrl.dgv.RowHeadersWidth + 1;
+        blankingPanel.Size            = BlankingPanelSz;
     }
 
-    // Re-applies the main DGV's current row-header width and row height to the floating row-header DGV.
-    // Width syncs the single column and the DGV's total width. Height syncs every row's pixel height.
-    // Called after SetCellWidths() because WriteScrollBarRowHeaders (called explicitly by toolbar buttons
-    // after WriteToDataGridView) recreates all rows at the WinForms default height, not at the 20px that
-    // DgvStyleOverrides establishes — causing progressive vertical drift without this correction.
-    public void SyncRowHeaderWidth()
+    // Syncs each column in the column-header DGV to the main DGV's current column width.
+    private void SyncColumnWidths()
     {
-        if (dgvRowHeader.Rows.Count == 0 || dgvRowHeader.Columns.Count == 0)
-            return;
+        int colWidth = dgvCtrl.dgv.Columns[0].Width;
+        foreach (DataGridViewColumn col in dgvColHeader.Columns)
+            col.Width = colWidth;
+    }
 
-        int rowHdrWidth = dgvCtrl.dgv.RowHeadersWidth;
-        if (rowHdrWidth <= 0)
-            return;
+    // Syncs each row in the row-header DGV to the main DGV's current row height.
+    private void SyncRowHeights()
+    {
+        int rowHeight = dgvCtrl.dgv.Rows[0].Height;
+        foreach (DataGridViewRow row in dgvRowHeader.Rows)
+            row.Height = rowHeight;
+    }
 
-        dgvRowHeader.Columns[0].Width = rowHdrWidth;
-        dgvRowHeader.Width            = rowHdrWidth + 1;
-
-        int rowHeight = dgvCtrl.dgv.Rows.Count > 0 ? dgvCtrl.dgv.Rows[0].Height : 0;
-        if (rowHeight > 0)
-            foreach (DataGridViewRow row in dgvRowHeader.Rows)
-                row.Height = rowHeight;
+    // Single canonical entry point for syncing floating-header geometry with the main DGV.
+    // Called after any operation that mutates RowHeadersWidth, column widths, or row heights.
+    // Use SyncScope flags to sync only the dimensions you know have changed.
+    public void SyncFromMainDgv(SyncScope scope = SyncScope.All)
+    {
+        if (!HasContent()) return;
+        if ((scope & SyncScope.Geometry)     != 0) SyncGeometry();
+        if ((scope & SyncScope.ColumnWidths) != 0) SyncColumnWidths();
+        if ((scope & SyncScope.RowHeights)   != 0) SyncRowHeights();
     }
 
     // -------------------------Header write ---------------------------------------------------------------------------------------
@@ -463,24 +511,17 @@ public class DgvHeadersCtrl
     // Generic so callers can pass string[], double[], int[], etc. without conversion overhead.
     public void WriteScrollBarRowHeaders<T>(T[] values)
     {
-        if (values.Length == 0)
+        if (values == null || values.Length == 0)
             return;
 
         // None mode is required before adding columns to avoid the WinForms FillWeight exception that
         // fires when column widths are set before AutoSizeColumnsMode is None.
         dgvRowHeader.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+        dgvRowHeader.AutoSizeRowsMode    = DataGridViewAutoSizeRowsMode.None;
 
-        // Fallback: if the caller passed null or an empty array, synthesise dummy integer labels from
-        // the current row count so the header is never completely blank.
-        if (values == null || values.Length == 0)
-        {
-            if (dgvCtrl.dgv.Rows.Count == 0)
-                throw new Exception("WriteScrollBarRowHeaders called with no data and empty DGV.");
-
-            values = new T[dgvCtrl.dgv.Rows.Count];
-            for (int i = 0; i < values.Length; i++)
-                values[i] = (T)Convert.ChangeType(i, typeof(T));
-        }
+        // Set RowTemplate.Height before adding rows so each row is created at the correct height
+        // rather than at the WinForms default (~23px). SyncRowHeights() acts as a backstop.
+        dgvRowHeader.RowTemplate.Height = dgvCtrl.dgv.RowTemplate.Height;
 
         dgvRowHeader.Columns.Clear();
         dgvRowHeader.Rows.Clear();
@@ -498,20 +539,10 @@ public class DgvHeadersCtrl
     // Writes an array of values into the column-header DGV (single row, one value per column).
     public void WriteScrollBarColHeaders<T>(T[] values)
     {
-        if (values.Length == 0)
+        if (values == null || values.Length == 0)
             return;
 
         dgvColHeader.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-
-        if (values == null)
-        {
-            if (dgvCtrl.dgv.Columns.Count == 0)
-                throw new Exception("WriteScrollBarColHeaders called with no data and empty DGV.");
-
-            values = new T[dgvCtrl.dgv.Columns.Count];
-            for (int i = 0; i < values.Length; i++)
-                values[i] = (T)Convert.ChangeType(i, typeof(T));
-        }
 
         dgvColHeader.Columns.Clear();
         dgvColHeader.Rows.Clear();

@@ -1,8 +1,3 @@
-using System;
-using System.Windows.Forms;
-using System.Collections.Generic;
-using TableEditor.DataGrid;
-
 namespace TableEditor.Math;
 
 // Determines which axis direction SelectionWalker groups selected cells along.

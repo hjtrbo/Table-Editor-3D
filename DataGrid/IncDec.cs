@@ -1,12 +1,8 @@
-﻿﻿using System;
-using System.Data;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Collections.Generic;
+﻿using System;
 using System.Globalization;
-using TableEditor;
+using System.Windows.Forms;
 using Timers;
-using Key      = System.Windows.Input.Key;
+using Key = System.Windows.Input.Key;
 using Keyboard = System.Windows.Input.Keyboard;
 
 namespace TableEditor.DataGrid;
@@ -67,6 +63,7 @@ public class IncDec
         {
             Preset         = 125,
             AutoRestart    = true,
+            UiControl      = dgvCtrl.dgv,
             OnTimingDone   = IncDecTimer_Tick,
             DebugTimerName = "tmr_IncDec"
         };

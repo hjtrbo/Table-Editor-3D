@@ -1,6 +1,6 @@
+using MicroLibrary;
 using System;
 using System.Windows.Forms;
-using MicroLibrary;
 
 namespace Timers;
 
@@ -120,10 +120,9 @@ public class TimerOffDelay
         }
     }
 
-    // Aborts the timer task immediately, discarding any remaining accumulator count.
     public void Stop()
     {
-        taskTimer.Abort();
+        taskTimer.Stop();
 
         stopWatch.Stop();
 

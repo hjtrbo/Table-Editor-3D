@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-
 // Plot 3D type aliases â€” these short names are used throughout this file and by callers.
 using cColorScheme = Plot3D.Editor3D.cColorScheme;
 using cObject3D    = Plot3D.Editor3D.cObject3D;
 using cPoint3D     = Plot3D.Editor3D.cPoint3D;
 using cSurfaceData = Plot3D.Editor3D.cSurfaceData;
 using eColorScheme = Plot3D.Editor3D.eColorScheme;
+using Editor3D     = Plot3D.Editor3D;
 using eInvalidate  = Plot3D.Editor3D.eInvalidate;
 using eLegendPos   = Plot3D.Editor3D.eLegendPos;
 using eMouseCtrl   = Plot3D.Editor3D.eMouseCtrl;
@@ -18,7 +18,6 @@ using eRaster      = Plot3D.Editor3D.eRaster;
 using eSelEvent    = Plot3D.Editor3D.eSelEvent;
 using eSelType     = Plot3D.Editor3D.eSelType;
 using eTooltip     = Plot3D.Editor3D.eTooltip;
-using Editor3D     = Plot3D.Editor3D;
 
 namespace TableEditor.Graph3D;
 

@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
 
 namespace TableEditor;
 

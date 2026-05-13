@@ -1,14 +1,12 @@
 ﻿﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+// DgvCtrl lives in the DataGrid namespace after the parallel refactor.
+using TableEditor.DataGrid;
 using Timers;
-
 // Plot 3D type aliases â€” required because Graph3dCtrl exposes cPoint3D in its NDR event.
 using cObject3D    = Plot3D.Editor3D.cObject3D;
 using cPoint3D     = Plot3D.Editor3D.cPoint3D;
-
-// DgvCtrl lives in the DataGrid namespace after the parallel refactor.
-using TableEditor.DataGrid;
 
 namespace TableEditor.Graph3D;
 
@@ -136,6 +134,7 @@ public class DgvToGraph3d
         {
             Preset            = 125,
             AutoRestart       = true,
+            UiControl         = dgvCtrl.dgv,
             OnTimingDone      = Timer_ZValuesToDgv_Tick,
             DebugInstanceName = InstanceName,
             DebugTimerName    = "tmrZValuesToDgv",

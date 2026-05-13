@@ -1,11 +1,8 @@
 using System;
-using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Collections.Generic;
-using TableEditor;
-using Timers;
 using TableEditor.Clipboard;
+using Timers;
 
 namespace TableEditor.DataGrid;
 
@@ -84,6 +81,7 @@ public class DgvEvents
         tmr_DgvDataChanged_Debounced = new TimerOffDelay
         {
             Preset          = 50,
+            UiControl       = dgvCtrl.dgv,
             DebugTimerName  = "tmr_DgvDataChanged_Debounced",
             OnTimingDone    = Raise_DgvDataChanged_Debounced_Event
         };
@@ -91,6 +89,7 @@ public class DgvEvents
         tmr_DgvSizeChanged_Intermittent = new TimerOnDelay
         {
             Preset                 = 50,
+            UiControl              = dgvCtrl.dgv,
             AutoStop               = true,
             AutoStop_CountsPreset  = 4,
             DebugTimerName         = "tmr_DgvSizeChanged_Intermittent",
@@ -100,6 +99,7 @@ public class DgvEvents
         tmr_SelectionChanged_Intermittent = new TimerOnDelay
         {
             Preset                = 50,
+            UiControl             = dgvCtrl.dgv,
             AutoStop              = true,
             AutoStop_CountsPreset = 4,
             DebugTimerName        = "tmr_SelectionChanged_Intermittent",
@@ -109,6 +109,7 @@ public class DgvEvents
         tmr_SelectionChanged_Debounced = new TimerOffDelay
         {
             Preset         = 50,
+            UiControl      = dgvCtrl.dgv,
             DebugTimerName = "tmr_SelectionChanged_Debounced",
             OnTimingDone   = Raise_DgvSelectionChanged_Debounced_Event
         };

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -759,6 +758,7 @@ public class Paste
 #if DEBUG
                 Console.WriteLine(clipboard.ErrorText);
 #endif
+                MessageBox.Show(clipboard.ErrorText, "Paste Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             InProgress = false;

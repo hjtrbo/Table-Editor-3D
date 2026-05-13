@@ -1,21 +1,16 @@
-﻿﻿using System;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
-using System.Linq;
 using System.Drawing;
 using System.Reflection;
-using System.Globalization;
-using System.ComponentModel;
-using System.Windows.Forms;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using TableEditor;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using TableEditor.Clipboard;
-using TableEditor.UndoRedo;
 using TableEditor.Layout;
-using Timers;
-using Key      = System.Windows.Input.Key;
+using TableEditor.UndoRedo;
+using Key = System.Windows.Input.Key;
 using Keyboard = System.Windows.Input.Keyboard;
 
 namespace TableEditor.DataGrid;
@@ -275,6 +270,7 @@ public class DgvCtrl
     {
         if (disposing)
         {
+            dgvHeaders?.Dispose();
             UnsubscribeEvents();
             font?.Dispose();
         }
@@ -647,6 +643,7 @@ public class DgvCtrl
         });
     }
 
+    [Obsolete("Not called from active code; SetCellWidths() (no-args) supersedes this.")]
     private void SetCellWidths(DgvData e)
     {
         if (SizeChangedDebug)
@@ -677,8 +674,7 @@ public class DgvCtrl
 
         SetDgvSize();
 
-        if (UseMyScrollBars) dgvHeaders?.SyncColHeaderWidths();
-        if (UseMyScrollBars) dgvHeaders?.SyncRowHeaderWidth();
+        if (UseMyScrollBars) dgvHeaders?.SyncFromMainDgv();
     }
 
     private void SetCellWidths_NoHeaders()
@@ -732,6 +728,8 @@ public class DgvCtrl
         foreach (DataGridViewColumn column in dgv.Columns) column.Width = colHdrWidth;
 
         SetDgvSize();
+
+        if (UseMyScrollBars) dgvHeaders?.SyncFromMainDgv();
     }
 
     public void SetCellWidths()
@@ -793,8 +791,23 @@ public class DgvCtrl
 
         SetDgvSize();
 
-        if (UseMyScrollBars) dgvHeaders?.SyncColHeaderWidths();
-        if (UseMyScrollBars) dgvHeaders?.SyncRowHeaderWidth();
+        if (UseMyScrollBars) dgvHeaders?.SyncFromMainDgv();
+    }
+
+    // Convenience method for loading a complete table when floating headers are in use.
+    // Pre-populates the header DGVs BEFORE calling WriteToDataGridView so that SetCellWidths()
+    // inside Refresh(All) can correctly measure the header text on its first pass.
+    // rowHeadersText / colHeadersText default to the numeric string representation of the axis arrays.
+    public void LoadTable(double[] rowLabels, double[] colLabels, double[,] values,
+                          string[] rowHeadersText = null, string[] colHeadersText = null,
+                          RefreshMode refreshMode = RefreshMode.All)
+    {
+        if (UseMyScrollBars)
+        {
+            dgvHeaders.WriteScrollBarRowHeaders(rowHeadersText ?? DgvData.ConvertNumericHeadersToText(rowLabels));
+            dgvHeaders.WriteScrollBarColHeaders(colHeadersText ?? DgvData.ConvertNumericHeadersToText(colLabels));
+        }
+        WriteToDataGridView(rowLabels, colLabels, values, refreshMode);
     }
 
     private void SetDgvSize()

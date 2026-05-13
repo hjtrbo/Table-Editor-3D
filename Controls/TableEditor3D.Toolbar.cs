@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using TableEditor.Clipboard;
-using TableEditor.Forms;
 using TableEditor.DataGrid;
+using TableEditor.Forms;
 using TableEditor.Math;
 
 namespace TableEditor;
@@ -177,7 +177,6 @@ partial class TableEditor3D
     {
         DgvNumberFormat.CelLckOut = false;
         DgvCtrl.paste.ParseClipboardToDgv(DgvCtrl, Paste.eMode.PasteTableWithNoAxis);
-        DgvCtrl.Refresh(RefreshMode.All);
     }
 
     private void Paste_Click(object sender, EventArgs e)
@@ -254,6 +253,7 @@ partial class TableEditor3D
         DgvCtrl.myEvents.Pause_SelectionToGraph3d();
         DgvCtrl.ResetDataTable();
         DgvCtrl.StyleOverrides(DgvCtrl.dgv);
+        DgvCtrl.dgvHeaders?.HideHeaders();
         Graph3dCtrl.Reset();
         DgvCtrl.myEvents.Resume_SelectionToGraph3d();
     }
@@ -292,59 +292,25 @@ partial class TableEditor3D
     // Optional default args allow the Demo form to call these directly without a sender/event.
     public void btn_LoadSample1_Click(object sender = null, EventArgs e = null)
     {
-        DgvCtrl.WriteToDataGridView(
-            SampleData.RowHeaders1, SampleData.ColHeaders1, SampleData.TableData1,
-            RefreshMode.All);
-
-        if (UseMyScrollBars)
-        {
-            DgvCtrl.dgvHeaders.WriteScrollBarRowHeaders(DgvData.ConvertNumericHeadersToText(SampleData.RowHeaders1));
-            DgvCtrl.dgvHeaders.WriteScrollBarColHeaders(DgvData.ConvertNumericHeadersToText(SampleData.ColHeaders1));
-        }
-
-        DgvCtrl.SetCellWidths();
+        DgvCtrl.LoadTable(SampleData.RowHeaders1, SampleData.ColHeaders1, SampleData.TableData1);
     }
 
     public void btn_LoadSample2_Click(object sender = null, EventArgs e = null)
     {
-        DgvCtrl.WriteToDataGridView(
-            SampleData.RowHeaders2, SampleData.ColHeaders2, SampleData.TableData2,
-            RefreshMode.All);
-
-        if (UseMyScrollBars)
-        {
-            DgvCtrl.dgvHeaders.WriteScrollBarRowHeaders(DgvData.ConvertNumericHeadersToText(SampleData.RowHeaders2));
-            DgvCtrl.dgvHeaders.WriteScrollBarColHeaders(DgvData.ConvertNumericHeadersToText(SampleData.ColHeaders2));
-        }
-
-        DgvCtrl.SetCellWidths();
+        DgvCtrl.LoadTable(SampleData.RowHeaders2, SampleData.ColHeaders2, SampleData.TableData2);
     }
 
     public void btn_LoadSample3_Click(object sender = null, EventArgs e = null)
     {
-        DgvCtrl.WriteToDataGridView(
-            SampleData.RowHeaders3, SampleData.ColHeaders3, SampleData.TableData3,
-            RefreshMode.All);
-
-        if (UseMyScrollBars)
-        {
-            DgvCtrl.dgvHeaders.WriteScrollBarRowHeaders(DgvData.ConvertNumericHeadersToText(SampleData.RowHeaders3));
-            DgvCtrl.dgvHeaders.WriteScrollBarColHeaders(DgvData.ConvertNumericHeadersToText(SampleData.ColHeaders3));
-        }
-
-        DgvCtrl.SetCellWidths();
+        DgvCtrl.LoadTable(SampleData.RowHeaders3, SampleData.ColHeaders3, SampleData.TableData3);
     }
 
     public void btn_LoadSample4_Click(object sender = null, EventArgs e = null)
     {
-        DgvCtrl.WriteToDataGridView(
+        // Sample 4 uses text row-header labels ("1st Gear" etc.) rather than numeric values.
+        DgvCtrl.LoadTable(
             SampleData.RowHeaders4, SampleData.ColHeaders4, SampleData.TableData4,
-            RefreshMode.All);
-
-        DgvCtrl.dgvHeaders.WriteScrollBarRowHeaders(SampleData.RowHeaders4Text);
-        DgvCtrl.dgvHeaders.WriteScrollBarColHeaders(DgvData.ConvertNumericHeadersToText(SampleData.ColHeaders4));
-
-        DgvCtrl.SetCellWidths();
+            SampleData.RowHeaders4Text);
     }
 
     // ----- Interpolation buttons -----
@@ -665,6 +631,8 @@ partial class TableEditor3D
 
     private void btn_Graph3D_Instructions_Click(object sender, EventArgs e)
     {
+        return;
+
         // Bring an existing instructions window to the front rather than opening a second one.
         foreach (Form openForm in Application.OpenForms)
         {
