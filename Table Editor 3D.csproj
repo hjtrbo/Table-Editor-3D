@@ -195,22 +195,22 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <!-- Embedded resources for forms (resx files stay in root for designer compatibility) -->
-    <EmbeddedResource Include="01_TableEditor3D.resx">
-      <DependentUpon>01_TableEditor3D.cs</DependentUpon>
+    <!-- Embedded resources for forms -->
+    <EmbeddedResource Include="Controls\TableEditor3D.resx">
+      <DependentUpon>TableEditor3D.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="02_Graph3D_Instructions.resx">
-      <DependentUpon>02_Graph3D_Instructions.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\AverageTool.resx">
+      <DependentUpon>AverageTool.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="03_UserSettingsDialog.resx">
-      <DependentUpon>03_UserSettingsDialog.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\Graph3DInstructionsDialog.resx">
+      <DependentUpon>Graph3DInstructionsDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="04_AverageTool.resx">
-      <DependentUpon>04_AverageTool.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\PasteWithXAxisPcmtecDialog.resx">
+      <DependentUpon>PasteWithXAxisPcmtecDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="05_Pcmtec_X_Axis.resx">
-      <DependentUpon>05_Pcmtec_X_Axis.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\UserSettingsDialog.resx">
+      <DependentUpon>UserSettingsDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Table Editor 3D.resx">
       <DependentUpon>Table Editor 3D.cs</DependentUpon>
