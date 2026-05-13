@@ -83,14 +83,14 @@
     <!-- Entry point -->
     <Compile Include="Program.cs" />
     <!-- Off-limits vendored 3D engine -->
-    <Compile Include="06_Graph3D.cs">
+    <Compile Include="Controls\Graph3D.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <!-- Demo host application -->
-    <Compile Include="Table Editor 3D.cs">
+    <Compile Include="Forms\Table Editor 3D.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Table Editor 3D.Designer.cs">
+    <Compile Include="Forms\Table Editor 3D.Designer.cs">
       <DependentUpon>Table Editor 3D.cs</DependentUpon>
     </Compile>
     <!-- Controls: the main UserControl (3 partial files + designer) -->
@@ -212,7 +212,7 @@
     <EmbeddedResource Include="Forms\UserSettingsDialog.resx">
       <DependentUpon>UserSettingsDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Table Editor 3D.resx">
+    <EmbeddedResource Include="Forms\Table Editor 3D.resx">
       <DependentUpon>Table Editor 3D.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -224,7 +224,6 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="App.config" />
-    <None Include="Logger.snippet" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

@@ -631,8 +631,6 @@ partial class TableEditor3D
 
     private void btn_Graph3D_Instructions_Click(object sender, EventArgs e)
     {
-        return;
-
         // Bring an existing instructions window to the front rather than opening a second one.
         foreach (Form openForm in Application.OpenForms)
         {
