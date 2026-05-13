@@ -1,47 +1,55 @@
-using MicroLibrary;
 using System;
+using System.Threading;
 using System.Windows.Forms;
+using ThreadingTimer = System.Threading.Timer;
 
-namespace Timers;
+namespace TableEditor.Timers;
 
-// Off-delay timer: the output stays true for the Preset duration after the enabling signal goes
-// false. Repeated Start() calls while timing reload the accumulator, extending the delay (retrig
-// behaviour). Replicates the PLC TOF instruction.
+// Off-delay timer: the done event fires after Preset milliseconds have elapsed since the most
+// recent Start() call. Each Start() while timing reloads the delay (retriggerable), matching the
+// PLC TOF instruction.
+//
+// Backed by a System.Threading.Timer — the callback runs on a ThreadPool thread, not the UI
+// thread. OnTimingDone is marshalled to UiControl via BeginInvoke.
 public class TimerOffDelay
 {
     #region Properties
 
-    // Timer preset value in milliseconds
+    // Timer preset in milliseconds. Must be >= 1.
     public int Preset { get; set; }
 
-    // Timer accumulator value in ms. Decrements as timer is timing down
+    // Snapshot of remaining time in ms. Updated only when the timer (re)starts, not continuously.
     public int Accumulator { get; private set; }
 
-    // Timer timing. On when timer is timing down
+    // True between Start() and the done event (or Stop()).
     public bool TimerTiming { get; private set; }
 
-    // Timer period done. Stays high until Start() or Stop() is next called
+    // Latches true on the done event. Stays high until the next Start() or Stop().
     public bool TimerDone { get; set; }
 
-    // Debug mode. Writes status to console with timer information
+    // Debug mode. Writes status to console.
     public bool Debug { get; set; }
 
-    // The name of the class that owns this timer instance
+    // The name of the class that owns this timer instance.
     public string DebugInstanceName { get; set; }
 
-    // Meaningful name for the debug console output
+    // Meaningful name for the debug console output.
     public string DebugTimerName { get; set; }
 
-    // Form control reference used to marshal the done event back to the UI thread.
-    // Stored per-instance so that multiple timers can target different controls.
+    // Form control used to marshal the done event back to the UI thread. Stored per-instance so
+    // multiple timers can target separate controls.
     public Control UiControl { get; set; }
 
     #endregion
 
     #region Variables
 
-    private readonly MyStopWatch stopWatch; // for debugging
-    private readonly MicroTimer taskTimer;
+    private readonly MyStopWatch stopWatch;
+    private readonly ThreadingTimer timer;
+    private readonly object syncLock = new object();
+
+    // True while the underlying Timer has been Change()'d to fire.
+    private bool isScheduled;
 
     public delegate void TimingDoneCallback();
 
@@ -54,120 +62,101 @@ public class TimerOffDelay
 
     public TimerOffDelay()
     {
-        // New MicroTimer and add event handler
-        taskTimer = new MicroTimer();
-        taskTimer.MicroTimerElapsed += new MicroTimer.MicroTimerElapsedEventHandler(Tick);
+        // Start dormant; Start() arms it.
+        timer = new ThreadingTimer(OnTick, null, Timeout.Infinite, Timeout.Infinite);
 
-        // Stopwatch for debug mode
         stopWatch = new MyStopWatch();
-
-        // Set tick interval. 2 ms resolution gives consistent ticks without excessive CPU spin.
-        taskTimer.Interval = 2000;
     }
 
     #endregion
 
     #region Functions
 
-    // Starts the timer off delay. Repeated calls whilst the timer is running reset the accumulator
-    // to the preset value (retriggerable). Replicates setting the Enabled property true then false.
+    // Starts (or re-triggers) the off-delay. If the timer is already running, the period is
+    // reloaded to extend the delay — this is the retrig behaviour callers rely on for debouncing.
     public void Start()
     {
-        if (Debug && !TimerTiming)
+        if (Preset < 1)
+            throw new Exception("Preset must be >= 1 ms");
+
+        lock (syncLock)
         {
-            Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Start()");
-        }
+            if (Debug && !TimerTiming)
+                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Start()");
 
-        // If timer is already timing, reload the accumulator and return to extend the delay
-        if (TimerTiming)
-        {
-            Accumulator = Preset / (int)(taskTimer.Interval / 1000); // Convert preset ms into interval ticks
-            if (Debug)
-                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Returned. Timer already timing");
-            return;
-        }
-
-        Initialise();
-        Start_Internal();
-    }
-
-    // Loads timer parameters before the first tick so state is consistent from the moment Start()
-    // returns, even before the microTimer fires its first callback.
-    private void Initialise()
-    {
-        Accumulator = Preset / (int)(taskTimer.Interval / 1000); // Convert preset ms into interval ticks
-        TimerTiming = true;
-        TimerDone = false;
-
-        if (Debug)
-            Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Initialised");
-    }
-
-    // Starts the internal microTimer if it is not already running.
-    private void Start_Internal()
-    {
-        if (!taskTimer.Enabled)
-        {
-            taskTimer.Start();
-
-            if (Debug)
+            if (TimerTiming)
             {
-                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - taskTimer.Start()");
+                // Retrig: extend the in-flight period without firing a fresh debug start line.
+                timer.Change(Preset, Timeout.Infinite);
+                Accumulator = Preset;
+                if (Debug)
+                    Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Reloaded. Timer already timing");
+                return;
             }
 
-            // For debug and ToString override
+            Accumulator = Preset;
+            TimerTiming = true;
+            TimerDone = false;
+
+            if (Debug)
+                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Initialised");
+
+            timer.Change(Preset, Timeout.Infinite);
+            isScheduled = true;
+
             stopWatch.Restart();
+
+            if (Debug)
+                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - taskTimer.Start()");
         }
     }
 
     public void Stop()
     {
-        taskTimer.Stop();
-
-        stopWatch.Stop();
-
-        Accumulator = 0;
-        TimerTiming = false;
-        TimerDone = false;
-
-        if (Debug)
-            Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Stop()");
-    }
-
-    // Task timer tick event callback — runs on the high-priority timer thread, not the UI thread.
-    private void Tick(object sender, MicroTimerEventArgs timerEventArgs)
-    {
-        RunTimerTask();
-    }
-
-    // Decrements the accumulator each tick and triggers the done event when it reaches zero.
-    private void RunTimerTask()
-    {
-        Accumulator--;
-
-        if (Accumulator <= 0)
+        lock (syncLock)
         {
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            isScheduled = false;
+
+            stopWatch.Stop();
+
             Accumulator = 0;
             TimerTiming = false;
+            TimerDone = false;
 
-            RaiseEventReq();
+            if (Debug)
+                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Stop()");
         }
     }
 
-    // Stops the internal timer, latches TimerDone, then marshals the callback to the UI thread.
-    private void RaiseEventReq()
+    // ThreadPool callback. Latches TimerDone, then marshals OnTimingDone to the UI thread.
+    private void OnTick(object state)
     {
-        // Stop the task timer
-        taskTimer.Stop();
+        bool fireEvent;
 
-        if (Debug)
+        lock (syncLock)
         {
-            Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - taskTimer.Stop()");
+            // Drop stray callbacks that may have been queued before Stop() disarmed the timer.
+            if (!isScheduled)
+                return;
+
+            isScheduled = false;
+
+            if (Debug)
+                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - taskTimer.Stop()");
+
+            Accumulator = 0;
+            TimerTiming = false;
+            TimerDone = true;
+            fireEvent = true;
         }
 
-        // Stays true until Start() or Stop() is called
-        TimerDone = true;
+        if (fireEvent)
+            RaiseEventReq();
+    }
 
+    private void RaiseEventReq()
+    {
         if (Debug)
         {
             Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Timer done, event fired");
@@ -177,13 +166,9 @@ public class TimerOffDelay
         // Guard against the control being destroyed between the timer firing and the invoke being
         // queued.
         if (UiControl?.IsHandleCreated == true && !UiControl.IsDisposed)
-        {
             RaiseOnTimingDoneEvent();
-        }
         else
-        {
             Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Event fire failed! Control Handle not created");
-        }
     }
 
     protected virtual void RaiseOnTimingDoneEvent()

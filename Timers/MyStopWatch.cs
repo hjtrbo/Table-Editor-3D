@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Timers;
+namespace TableEditor.Timers;
 
 // Wraps Stopwatch to provide a formatted elapsed-time string, primarily for debug output and
 // ToString overrides in the timer classes. Keeps the formatting logic in one place so callers

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
+using TableEditor.Common;
+using TableEditor.Controls;
 
-namespace TableEditor;
+namespace TableEditor.Forms;
 
 public partial class App : Form
 {

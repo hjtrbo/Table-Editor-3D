@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using TableEditor.Common;
 using TableEditor.DataGrid;
 
 // Suppress the ambiguity between System.Windows.Forms.Clipboard and this class name by

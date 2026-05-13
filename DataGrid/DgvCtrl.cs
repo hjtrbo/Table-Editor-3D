@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TableEditor.Clipboard;
+using TableEditor.Common;
 using TableEditor.Layout;
 using TableEditor.UndoRedo;
 using Key = System.Windows.Input.Key;

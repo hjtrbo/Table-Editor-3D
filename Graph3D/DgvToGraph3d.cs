@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 // DgvCtrl lives in the DataGrid namespace after the parallel refactor.
+using TableEditor.Common;
 using TableEditor.DataGrid;
-using Timers;
+using TableEditor.Timers;
 // Plot 3D type aliases â€” required because Graph3dCtrl exposes cPoint3D in its NDR event.
 using cObject3D    = Plot3D.Editor3D.cObject3D;
 using cPoint3D     = Plot3D.Editor3D.cPoint3D;

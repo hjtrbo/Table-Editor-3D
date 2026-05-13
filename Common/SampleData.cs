@@ -1,4 +1,4 @@
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Pre-built ECU map data used by the Demo form.  All four tables share the same column
 // headers (RPM axis) defined in ColHeaders1/ColHeaders2, while row headers are load or

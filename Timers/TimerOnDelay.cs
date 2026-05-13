@@ -1,54 +1,60 @@
-using MicroLibrary;
 using System;
+using System.Threading;
 using System.Windows.Forms;
+using ThreadingTimer = System.Threading.Timer;
 
-namespace Timers;
+namespace TableEditor.Timers;
 
-// On-delay timer: the done event fires once the signal has been continuously true for the
-// configured Preset duration. Repeated Start() calls while timing are ignored; calling Stop()
-// cancels. AutoRestart and AutoStop modes extend this for periodic / watchdog patterns.
+// On-delay timer: the done event fires once Preset milliseconds have elapsed since Start() was
+// called. Repeated Start() calls while timing are ignored; calling Stop() cancels. AutoRestart
+// keeps firing on every Preset interval; AutoStop is AutoRestart with a watchdog count that
+// auto-stops if Start() is not refreshed within AutoStop_CountsPreset done events.
+//
+// Backed by a System.Threading.Timer so the callback runs on a ThreadPool thread, not the UI
+// thread. OnTimingDone is marshalled to UiControl via BeginInvoke.
 public class TimerOnDelay
 {
     #region Properties
 
-    // Timer preset value in milliseconds
+    // Timer preset in milliseconds. Must be >= 1.
     public int Preset { get; set; }
 
-    // Timer accumulator value in ms. Decrements as timer is timing down
+    // Remaining time in milliseconds. Snapshot only — refreshed inside the callback when the
+    // timer fires, not continuously.
     public int Accumulator { get; private set; }
 
-    // True when timer is timing down
+    // True between Start() and the next done event (or Stop()).
     public bool TimerTiming { get; private set; }
 
-    // Stays high until timer is next enabled
+    // Latches true on each done event. Stays high until the next Start() / Stop().
     public bool TimerDone { get; private set; }
 
-    // Enables 'endless timing' firing the timer done event each timing period. Call Stop() to end
+    // Endless firing — OnTimingDone is raised every Preset ms until Stop() is called.
     public bool AutoRestart { get; set; }
 
-    // If using AutoRestart timing mode and this property is set true, the timer will automatically
-    // stop if a call to Start() has not been received within the number of timer done events as
-    // configured in the AutoStop_CountsPreset property
+    // Watchdog mode: like AutoRestart, but the timer auto-stops after AutoStop_CountsPreset done
+    // events unless Start() is called again to reload the count. Cannot be combined with
+    // AutoRestart.
     public bool AutoStop { get; set; }
 
-    // If in AutoRestart timing mode and if AutoStop is true and a call to Start() hasn't been
-    // received for this many timer done events, the timer will stop
+    // Number of consecutive done events allowed before AutoStop triggers a Stop().
     public int AutoStop_CountsPreset { get; set; }
 
-    // If AutoStop is used, this property is the counts remaining until the timer stops
+    // Remaining done events before AutoStop fires. Reloaded to AutoStop_CountsPreset on each
+    // external Start() call.
     public int AutoStop_CountsToGo { get; private set; }
 
-    // Debug mode. Writes status to console
+    // Debug mode. Writes status to console.
     public bool Debug { get; set; }
 
-    // The name of the class that owns this timer instance
+    // The name of the class that owns this timer instance.
     public string DebugInstanceName { get; set; }
 
-    // Meaningful name for the debug console output
+    // Meaningful name for the debug console output.
     public string DebugTimerName { get; set; }
 
-    // Form control reference used to marshal the done event back to the UI thread.
-    // Stored per-instance so that multiple timers can target different controls.
+    // Form control used to marshal the done event back to the UI thread. Stored per-instance so
+    // multiple timers can target separate controls.
     public Control UiControl { get; set; }
 
     #endregion
@@ -56,14 +62,17 @@ public class TimerOnDelay
     #region Variables
 
     private readonly MyStopWatch stopWatch;
-    private readonly MicroTimer microTimer;
+    private readonly ThreadingTimer timer;
+    private readonly object syncLock = new object();
+
+    // True while the underlying Timer has been Change()'d to fire — distinguishes a live timer
+    // from an idle one without polling the framework.
+    private bool isScheduled;
 
     public delegate void TimingDoneCallback();
 
     // Assign your callback method to this field to be notified when timing completes.
     public TimingDoneCallback OnTimingDone;
-
-    private bool restartLatch = false;
 
     #endregion
 
@@ -71,111 +80,75 @@ public class TimerOnDelay
 
     public TimerOnDelay()
     {
-        // New MicroTimer and add event handler
-        microTimer = new MicroTimer();
-        microTimer.MicroTimerElapsed += new MicroTimer.MicroTimerElapsedEventHandler(Tick);
+        // Start the timer dormant. Start() arms it via Change() once Preset is known.
+        timer = new ThreadingTimer(OnTick, null, Timeout.Infinite, Timeout.Infinite);
 
-        // Stopwatch for debug mode
         stopWatch = new MyStopWatch();
-
-        // Set tick interval. 2 ms resolution gives consistent ticks without excessive CPU spin.
-        microTimer.Interval = 2000;
     }
 
     #endregion
 
     #region Functions
 
-    // Starts the timer task. The timer runs to completion each call. Repeated calls whilst the
-    // timer is running are ignored. If AutoStop mode is active, each call resets the number of
-    // timer period done events counted.
+    // Starts the timer. Repeated calls while running are ignored (the existing period continues).
+    // In AutoStop mode each external call reloads AutoStop_CountsToGo, which is how the caller
+    // pets the watchdog.
     public void Start()
     {
-        // Preset must be greater than the task timer interval
-        if (Preset < microTimer.Interval / 1000) // us to ms
-            throw new Exception($"Preset must be greater or equal to {microTimer.Interval / 1000}");
+        if (Preset < 1)
+            throw new Exception("Preset must be >= 1 ms");
 
-        // Cannot have AutoRestart and AutoStop on at the same time
         if (AutoStop && AutoRestart)
-            throw new Exception($"Cannot have AutoStop and AutoRestart set true at the same time");
+            throw new Exception("Cannot have AutoStop and AutoRestart set true at the same time");
 
-        // If no off counts are set by the user, raise this error
         if (AutoStop && AutoStop_CountsPreset <= 0)
-            throw new Exception($"AutoStopOffCounts must be > 0");
+            throw new Exception("AutoStop_CountsPreset must be > 0");
 
-        // If AutoStop mode is enabled, load / reload the number of autostop counts to go then return.
-        if (AutoStop)
+        lock (syncLock)
         {
-            if (!restartLatch)
+            // AutoStop: reload the watchdog count on every external Start() call.
+            if (AutoStop)
             {
-                if (Debug && (AutoStop_CountsToGo != AutoStop_CountsPreset))
-                {
-                    Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Start() AutoStop_OffCountsToGo Loaded");
-                }
+                if (Debug && AutoStop_CountsToGo != AutoStop_CountsPreset)
+                    Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Start() AutoStop_CountsToGo loaded");
 
                 AutoStop_CountsToGo = AutoStop_CountsPreset;
             }
-        }
 
-        // Return if we are already timing. This bit will be false if we have arrived here from a call to Restart()
-        if (TimerTiming)
-        {
-            if (Debug)
+            // Already running — leave the in-flight period alone.
+            if (TimerTiming)
             {
-                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Start() call ignored. Timer already running");
+                if (Debug)
+                    Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Start() call ignored. Timer already running");
+                return;
             }
 
-            return;
-        }
+            TimerTiming = true;
+            TimerDone = false;
+            Accumulator = Preset;
 
-        // Anticipated setting of the timer timing flag. Bridges the delay between the first start
-        // call and the first microTimer tick.
-        TimerTiming = true;
+            if (Debug)
+                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Timer started");
 
-        // Timer started debug
-        if (Debug && !restartLatch)
-        {
-            Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Timer started");
-        }
+            stopWatch.Start();
 
-        // Clear the restart flag
-        restartLatch = false;
-
-        // For debug and ToString override
-        stopWatch.Start();
-
-        // Preset loads into accumulator: ms / ticks
-        Accumulator = Preset / (int)(microTimer.Interval / 1000);
-
-        // Start the task timer — must be the last code line in the start function
-        if (!microTimer.Enabled)
-            microTimer.Start();
-    }
-
-    // Internal restart path: keeps the microTimer thread alive across consecutive timer periods
-    // instead of tearing it down and spinning it back up, which would introduce latency jitter.
-    private void Restart()
-    {
-        // Restart flag to keep taskTimer running and allows for selective conditions in the start
-        // function that are required to auto restart the timer
-        restartLatch = true;
-
-        Start();
-
-        // Reset the restart latch
-        restartLatch = false;
-
-        if (Debug)
-        {
-            Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Timer restarted");
+            // AutoRestart / AutoStop want repeated fires; single-shot wants Infinite period.
+            int period = (AutoRestart || AutoStop) ? Preset : Timeout.Infinite;
+            timer.Change(Preset, period);
+            isScheduled = true;
         }
     }
 
     public void Stop()
     {
-        // If not set to auto restart, nuke the microtimer thread
-        if (!restartLatch && microTimer.Enabled)
+        lock (syncLock)
         {
+            if (!isScheduled)
+                return;
+
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+            isScheduled = false;
+
             if (Debug)
             {
                 if (!AutoStop)
@@ -184,38 +157,60 @@ public class TimerOnDelay
                     Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Timer auto stopped");
             }
 
-            // For debug and ToString override
             stopWatch.Stop();
 
-            // Resets
             TimerDone = false;
             TimerTiming = false;
             Accumulator = 0;
             AutoStop_CountsToGo = 0;
-
-            microTimer.Stop();
         }
     }
 
-    // Task timer tick event callback — runs on the high-priority timer thread, not the UI thread.
-    private void Tick(object sender, MicroTimerEventArgs timerEventArgs)
+    // ThreadPool callback. Updates state, decrements the AutoStop watchdog, marshals OnTimingDone
+    // to the UI thread.
+    private void OnTick(object state)
     {
-        RunTimerTask();
-    }
+        bool fireEvent;
 
-    private void RunTimerTask()
-    {
-        Accumulator--;
-        TimerTiming = true;
-
-        if (Accumulator <= 0)
+        lock (syncLock)
         {
+            // Ignore stray callbacks that may have been queued before Stop() disarmed the timer.
+            if (!isScheduled)
+                return;
+
             Accumulator = 0;
             TimerTiming = false;
             TimerDone = true;
+            fireEvent = true;
 
-            RaiseEventReq();
+            // AutoStop: count down, stop when exhausted.
+            if (AutoStop)
+            {
+                AutoStop_CountsToGo--;
+
+                if (Debug)
+                    Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - AutoStop_CountsToGo = {AutoStop_CountsToGo}");
+
+                if (AutoStop_CountsToGo <= 0)
+                {
+                    timer.Change(Timeout.Infinite, Timeout.Infinite);
+                    isScheduled = false;
+                    AutoStop_CountsToGo = 0;
+                }
+            }
+
+            // In repeating modes the next period is already scheduled by the timer itself —
+            // reset the visible state so observers see a fresh accumulator.
+            if (isScheduled && (AutoRestart || AutoStop))
+            {
+                TimerTiming = true;
+                TimerDone = false;
+                Accumulator = Preset;
+            }
         }
+
+        if (fireEvent)
+            RaiseEventReq();
     }
 
     private void RaiseEventReq()
@@ -226,38 +221,12 @@ public class TimerOnDelay
             Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Preset = {((double)Preset / 1000).ToString("0.000")}s, Actual = {stopWatch.Get()}");
         }
 
-        // Marshal the event back to the UI thread. Guard against the control being destroyed
-        // between the timer firing and the invoke being queued.
+        // Guard against the control being destroyed between the timer firing and the invoke being
+        // queued.
         if (UiControl?.IsHandleCreated == true && !UiControl.IsDisposed)
-        {
             RaiseOnTimingDoneEvent();
-        }
         else
-        {
             Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - Event fire failed! Control Handle not created");
-        }
-
-        // If AutoStop mode is enabled, decrement the remaining count. Stop when exhausted.
-        if (AutoStop)
-        {
-            AutoStop_CountsToGo--;
-
-            if (Debug)
-                Console.WriteLine($"{DebugInstanceName} - {DebugTimerName} - AutoStopOffCountsToGo = {AutoStop_CountsToGo}");
-
-            if (AutoStop_CountsToGo == 0)
-            {
-                Stop();
-            }
-            else
-                Restart();
-        }
-
-        // If AutoRestart is enabled, start the timer again
-        if (AutoRestart)
-        {
-            Restart();
-        }
     }
 
     protected virtual void RaiseOnTimingDoneEvent()

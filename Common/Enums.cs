@@ -1,4 +1,4 @@
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Controls whether copy, paste, or both clipboard operations are available on a table instance.
 public enum CopyPasteMode

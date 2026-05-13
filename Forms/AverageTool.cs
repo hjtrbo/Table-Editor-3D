@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using TableEditor.Clipboard;
+using TableEditor.Common;
 using TableEditor.DataGrid;
 
 namespace TableEditor.Forms;

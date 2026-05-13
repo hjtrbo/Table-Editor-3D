@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Sizing constants that govern the initial and minimum dimensions of the control and
 // its embedded 3D graph pane.  All values are in pixels.  Changing these constants is

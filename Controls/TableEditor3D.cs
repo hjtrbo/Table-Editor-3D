@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using TableEditor.Common;
 using TableEditor.DataGrid;
 using TableEditor.Forms;
 using TableEditor.Graph3D;
@@ -16,7 +17,7 @@ using TableEditor.Settings;
 
 // Graph3D type aliases (types moved to TableEditor.Graph3D namespace)
 
-namespace TableEditor;
+namespace TableEditor.Controls;
 
 public partial class TableEditor3D : UserControl
 {

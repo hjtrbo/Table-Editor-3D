@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace TableEditor;
+namespace TableEditor.Controls;
 
 // DGV and Graph3D event wiring and cross-panel routing handlers for TableEditor3D.
 // Methods here translate DGV events into Graph3D updates and vice-versa so that neither

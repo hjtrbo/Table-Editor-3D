@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Lightweight debug logger that writes to the VS Output window and, optionally, to a
 // rolling log.txt file next to the executable.

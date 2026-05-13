@@ -1,6 +1,6 @@
-using Timers;
+using TableEditor.Timers;
 
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Application-wide singletons that don't belong to any particular subsystem.
 // Keep this class small — add a new home for things that grow into their own concern.

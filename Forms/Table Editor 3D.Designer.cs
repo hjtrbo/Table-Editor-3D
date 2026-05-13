@@ -1,4 +1,4 @@
-namespace TableEditor
+namespace TableEditor.Forms
 {
     partial class App
     {

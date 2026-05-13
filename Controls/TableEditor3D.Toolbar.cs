@@ -3,11 +3,12 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using TableEditor.Clipboard;
+using TableEditor.Common;
 using TableEditor.DataGrid;
 using TableEditor.Forms;
 using TableEditor.Math;
 
-namespace TableEditor;
+namespace TableEditor.Controls;
 
 // All toolbar button click handlers and context-menu handlers for TableEditor3D.
 // The Main_Timer polling loop lives here because it drives toolbar button state.

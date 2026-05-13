@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Determines the most compact "Nn" format string that still accurately represents a
 // given scalar, array, or table of doubles.  The logic inspects the actual decimal

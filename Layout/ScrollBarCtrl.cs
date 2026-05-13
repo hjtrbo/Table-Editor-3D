@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using TableEditor.DataGrid;
-using Timers;
+using TableEditor.Timers;
 
 namespace TableEditor.Layout;
 

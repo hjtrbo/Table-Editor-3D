@@ -1,3 +1,5 @@
+using TableEditor.Common;
+
 namespace TableEditor.DataGrid;
 
 // Tracks the current number formats for row headers, column headers, and cells.

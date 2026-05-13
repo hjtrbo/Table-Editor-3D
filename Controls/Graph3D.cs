@@ -65,7 +65,7 @@ using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Text;
 using System.Windows.Forms;
-using TableEditor;
+using TableEditor.Common;
 
 namespace Plot3D
 {

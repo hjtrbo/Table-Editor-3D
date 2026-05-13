@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace TableEditor;
+namespace TableEditor.Common;
 
 // Each field is a named TraceSwitch whose level is read from App.config at startup via
 // the standard <system.diagnostics><switches> section.  Setting a switch to level 4

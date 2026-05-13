@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using System.Text.RegularExpressions;
 
-namespace TableEditor;
+namespace TableEditor.Common;
 
 public static class Utils
 {

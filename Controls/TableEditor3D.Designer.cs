@@ -1,4 +1,4 @@
-namespace TableEditor
+namespace TableEditor.Controls
 {
     partial class TableEditor3D
     {
