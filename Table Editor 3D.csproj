@@ -131,7 +131,7 @@
     <!-- Math subsystem -->
     <Compile Include="Math\Interpolate.cs" />
     <Compile Include="Math\SelectionWalker.cs" />
-    <Compile Include="Math\Smooth.cs" />
+    <Compile Include="Math\SelectionSmoother.cs" />
     <Compile Include="Math\WalkMode.cs" />
     <!-- Undo/Redo subsystem -->
     <Compile Include="UndoRedo\Redo.cs" />

@@ -6,7 +6,7 @@ namespace TableEditor.Math;
 // Groups the selected cells in a DataGridView by column (Vertical) or row (Horizontal),
 // then invokes a callback once per group with the DataTable, primary index (column or row),
 // and the inclusive min/max secondary index within that group. This lets Interpolate and
-// Smooth share identical scaffolding while keeping their math separate.
+// SelectionSmoother share identical scaffolding while keeping their math separate.
 //
 // Walk does nothing when mode == All; callers are responsible for issuing two separate
 // Walk calls (Vertical then Horizontal, or vice-versa) so each can apply its own ordering.

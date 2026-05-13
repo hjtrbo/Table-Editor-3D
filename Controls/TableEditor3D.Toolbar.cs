@@ -340,7 +340,7 @@ partial class TableEditor3D
     private void btn_All_Smooth_Click(object sender, EventArgs e)
     {
         DgvCtrl.Events_CellDataAndSelectionChanged_Pause();
-        Smooth.SmoothSelection(DgvCtrl.dgv, DgvCtrl.SelectedCellCollection, WalkMode.All);
+        SelectionSmoother.Apply(DgvCtrl.dgv, DgvCtrl.SelectedCellCollection, WalkMode.All);
         DgvCtrl.Events_CellDataAndSelectionChanged_Resume(true);
         DgvCtrl.Refresh(RefreshMode.ColourOnly);
     }
@@ -348,7 +348,7 @@ partial class TableEditor3D
     private void btn_H_Smooth_Click(object sender, EventArgs e)
     {
         DgvCtrl.Events_CellDataAndSelectionChanged_Pause();
-        Smooth.SmoothSelection(DgvCtrl.dgv, DgvCtrl.SelectedCellCollection, WalkMode.Horizontal);
+        SelectionSmoother.Apply(DgvCtrl.dgv, DgvCtrl.SelectedCellCollection, WalkMode.Horizontal);
         DgvCtrl.Events_CellDataAndSelectionChanged_Resume(true);
         DgvCtrl.Refresh(RefreshMode.ColourOnly);
     }
@@ -356,7 +356,7 @@ partial class TableEditor3D
     private void btn_V_Smooth_Click(object sender, EventArgs e)
     {
         DgvCtrl.Events_CellDataAndSelectionChanged_Pause();
-        Smooth.SmoothSelection(DgvCtrl.dgv, DgvCtrl.SelectedCellCollection, WalkMode.Vertical);
+        SelectionSmoother.Apply(DgvCtrl.dgv, DgvCtrl.SelectedCellCollection, WalkMode.Vertical);
         DgvCtrl.Events_CellDataAndSelectionChanged_Resume(true);
         DgvCtrl.Refresh(RefreshMode.ColourOnly);
     }

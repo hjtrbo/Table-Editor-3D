@@ -5,7 +5,7 @@ namespace TableEditor.Math;
 
 // Applies a weighted moving-average smoothing pass to a DataGridView selection.
 // Endpoints of each selected run are pinned so the smoothing blends only the interior values.
-public static class Smooth
+public static class SelectionSmoother
 {
     // Fraction of the delta between each cell's value and its local moving average that is
     // removed per pass. 0 = no smoothing, 1 = full averaging. Default 0.5.
@@ -18,7 +18,7 @@ public static class Smooth
     // Smooths the selected cells along Vertical columns, Horizontal rows, or both.
     // In All mode the two directions alternate who goes first across successive calls
     // so repeated presses converge evenly on both axes.
-    public static void SmoothSelection(
+    public static void Apply(
         DataGridView dgv,
         DataGridViewSelectedCellCollection selectedCells,
         WalkMode mode)
@@ -27,13 +27,13 @@ public static class Smooth
         {
             if (verticalFirst)
             {
-                SmoothSelection(dgv, selectedCells, WalkMode.Vertical);
-                SmoothSelection(dgv, selectedCells, WalkMode.Horizontal);
+                Apply(dgv, selectedCells, WalkMode.Vertical);
+                Apply(dgv, selectedCells, WalkMode.Horizontal);
             }
             else
             {
-                SmoothSelection(dgv, selectedCells, WalkMode.Horizontal);
-                SmoothSelection(dgv, selectedCells, WalkMode.Vertical);
+                Apply(dgv, selectedCells, WalkMode.Horizontal);
+                Apply(dgv, selectedCells, WalkMode.Vertical);
             }
             verticalFirst = !verticalFirst;
             return;
