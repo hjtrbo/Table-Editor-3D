@@ -3883,6 +3883,8 @@ namespace Plot3D
         cUndoImpl                    mi_UndoBuffer;
         cTransform                   mi_Transform;
         cBounds                      mi_Bounds;
+        double                       md_RearX;                                // X face currently at the rear of the box
+        double                       md_RearY;                                // Y face currently at the rear of the box
         cTooltip                     mi_Tooltip;
         cSelection                   mi_Selection;
         cObject3D                    mi_DragObject;
@@ -4438,6 +4440,41 @@ namespace Plot3D
             // Calculate currently visible quadrant
             mi_Quadrant.Calculate(mi_Mouse.md_Phi, i_MainAxisX, i_MainAxisY, i_MainAxisZ);
 
+            // ---------- Keep the whole coordinate box at the rear ----------
+            // The quadrant above was calculated from the default min-face geometry, so axis labels
+            // and the floor still behave as before. Now move the two vertical walls and the main
+            // axes onto whichever X / Y faces are currently farthest from the viewer, so the entire
+            // coordinate box is always drawn behind the surface at every rotation angle.
+            // A face is at the rear when it has the smaller ProjectXY() sort key (= greater depth).
+            md_RearX = mi_Transform.ProjectXY(mi_Bounds.X.Min, 0, 0) <= mi_Transform.ProjectXY(mi_Bounds.X.Max, 0, 0)
+                     ? mi_Bounds.X.Min : mi_Bounds.X.Max;
+            md_RearY = mi_Transform.ProjectXY(0, mi_Bounds.Y.Min, 0) <= mi_Transform.ProjectXY(0, mi_Bounds.Y.Max, 0)
+                     ? mi_Bounds.Y.Min : mi_Bounds.Y.Max;
+
+            // The horizontal grid sits on whichever Z face is at the rear: the floor (Z min) in a top
+            // view, the ceiling (Z max) when looking up from below. Either way it stays behind the surface.
+            double d_RearZ = mi_Transform.ProjectXY(0, 0, mi_Bounds.Z.Min) <= mi_Transform.ProjectXY(0, 0, mi_Bounds.Z.Max)
+                           ? mi_Bounds.Z.Min : mi_Bounds.Z.Max;
+
+            i_MainAxisX.mi_Points[0].mi_P3D.Y = md_RearY; // X axis runs along the rear Y edge
+            i_MainAxisX.mi_Points[1].mi_P3D.Y = md_RearY;
+            i_MainAxisY.mi_Points[0].mi_P3D.X = md_RearX; // Y axis runs along the rear X edge
+            i_MainAxisY.mi_Points[1].mi_P3D.X = md_RearX;
+            i_MainAxisZ.mi_Points[0].mi_P3D.X = md_RearX; // Z axis stands at the rear corner
+            i_MainAxisZ.mi_Points[1].mi_P3D.X = md_RearX;
+            i_MainAxisZ.mi_Points[0].mi_P3D.Y = md_RearY;
+            i_MainAxisZ.mi_Points[1].mi_P3D.Y = md_RearY;
+
+            // Re-project the main axes at their new rear positions. The raster lines below clone
+            // these axes, so they inherit the rear placement automatically.
+            foreach (cLine i_Axis in mi_AxisLines)
+                i_Axis.Project3D();
+
+            // Every main axis now sits on a rear face --> always keep them behind the surface.
+            i_MainAxisX.md_Sort = -99999.9;
+            i_MainAxisY.md_Sort = -99999.9;
+            i_MainAxisZ.md_Sort = -99999.9;
+
             // Add raster lines in 6 different directions
             if (me_Raster >= eRaster.Raster)
             {
@@ -4495,20 +4532,21 @@ namespace Plot3D
                         if ((e_First == eCoord.X && e_Second == eCoord.Z) || // Blue
                             (e_First == eCoord.Z && e_Second == eCoord.X))
                         {
-                            i_Raster.md_Sort = mi_Quadrant.md_SortXZ;
+                            i_Raster.md_Sort = -99999.9; // XZ wall sits on the rear Y face --> always behind
                         }
                         else if ((e_First == eCoord.Z && e_Second == eCoord.Y) || // Green
                                  (e_First == eCoord.Y && e_Second == eCoord.Z))
                         {
-                            i_Raster.md_Sort = mi_Quadrant.md_SortYZ;
+                            i_Raster.md_Sort = -99999.9; // YZ wall sits on the rear X face --> always behind
                         }
                         else // X + Y Red
                         {
-                            i_Raster.md_Sort = mi_Quadrant.md_SortXY;
+                            i_Raster.md_Sort = -99999.9; // horizontal grid is on the rear Z face --> always behind
 
-                            // Special case: XY raster lines must be shifted down to negative end of Z axis
-                            i_Raster.mi_Points[0].mi_P3D.Z = i_MainAxisZ.mi_Points[0].mi_P3D.Z;
-                            i_Raster.mi_Points[1].mi_P3D.Z = i_MainAxisZ.mi_Points[0].mi_P3D.Z;
+                            // Shift the horizontal raster onto the rear Z face (floor in a top view,
+                            // ceiling when looking up from below) so it is never in front of the surface.
+                            i_Raster.mi_Points[0].mi_P3D.Z = d_RearZ;
+                            i_Raster.mi_Points[1].mi_P3D.Z = d_RearZ;
                         }
 
                         i_Raster.Project3D();
@@ -4797,8 +4835,16 @@ namespace Plot3D
             // ---------------------------------------------------
 
             // Set X, Y offset which user has set by mouse dragging with SHIFT key pressed
-            i_Graph.TranslateTransform(mi_Mouse.mk_OffMove.X + mi_Mouse.mk_OffCoord.X, 
+            i_Graph.TranslateTransform(mi_Mouse.mk_OffMove.X + mi_Mouse.mk_OffCoord.X,
                                        mi_Mouse.mk_OffMove.Y + mi_Mouse.mk_OffCoord.Y);
+
+            // Front faces (nearest the viewer) = opposite of the rear faces the box was moved onto.
+            // Axis tick labels are anchored to these front edges so they stay readable at every rotation.
+            double d_FrontX = (md_RearX == mi_Bounds.X.Min) ? mi_Bounds.X.Max : mi_Bounds.X.Min;
+            double d_FrontY = (md_RearY == mi_Bounds.Y.Min) ? mi_Bounds.Y.Max : mi_Bounds.Y.Min;
+            PointF k_Center2D = mi_Transform.Project3D(new cPoint3D((mi_Bounds.X.Min + mi_Bounds.X.Max) / 2.0,
+                                                                    (mi_Bounds.Y.Min + mi_Bounds.Y.Max) / 2.0,
+                                                                    (mi_Bounds.Z.Min + mi_Bounds.Z.Max) / 2.0), eMirror.None).Coord;
 
             SmoothingMode e_Smooth = SmoothingMode.Invalid;
 
@@ -4816,16 +4862,41 @@ namespace Plot3D
                 // Draw Line, Shape, Polygon
                 i_DrawObj.Render(i_Graph);
 
-                // Draw labels and legends
-                cLine i_Line = i_DrawObj as cLine;
-                if (i_Line         != null             &&
-                    i_Line.me_Line != eCoord.Invalid   &&
-                    mi_Quadrant.mb_BottomView == false && // no label in bottom view
-                    mi_Quadrant.ms32_Quadrant == 3)       // showing labels makes sense only in quadrant 3 
+            } // foreach (cDrawObj)
+
+            // Draw axis tick labels and legends in a SECOND pass, after every object, so they always
+            // sit on top of the surface and stay readable from any rotation - no longer limited to the
+            // home quadrant. Floor (X / Y) ticks are anchored to the front floor edge nearest the viewer;
+            // vertical (Z) ticks are placed on the rear vertical corner where the main Z axis line stands.
+            // Labels are drawn in every view (including looking up from below). The coordinate box is
+            // always at the rear, so labels sit on its edges and never fall in front of the surface.
+            {
+                // Vertical (Z) tick labels are drawn on BOTH rear walls, each on its own outer edge:
+                // the YZ wall at (rearX, frontY) and the XZ wall at (frontX, rearY). Both edges sit at
+                // the sides of the view, clear of the surface, so the Z scale reads off either wall.
+                void DrawZLabel(double d_Cx, double d_Cy, double d_Z, String s_Label)
                 {
+                    cPoint2D i_P2D = mi_Transform.Project3D(new cPoint3D(d_Cx, d_Cy, d_Z), eMirror.None);
+                    if (!i_P2D.IsValid)
+                        return;
+
+                    PointF       k_Pos   = i_P2D.Coord;
+                    StringFormat i_Align = new StringFormat();
+                    bool b_Right = k_Pos.X >= k_Center2D.X;
+                    i_Align.Alignment = b_Right ? StringAlignment.Near : StringAlignment.Far;
+                    k_Pos.X += b_Right ? 5 : -5;
+                    k_Pos.Y -= Font.Height / 2.0f;
+                    i_Graph.DrawString(s_Label, Font, AxisZ.LegendBrush, k_Pos, i_Align);
+                }
+
+                foreach (cLine i_Line in mi_AxisLines)
+                {
+                    if (!i_Line.IsValid || i_Line.me_Line == eCoord.Invalid)
+                        continue;
+
                     bool b_Legend = false;
 
-                    // Draw axis legends at end of of main axis
+                    // Draw axis legends at end of main axis (only active when LegendPos == AxisEnd)
                     if (me_LegendPos == eLegendPos.AxisEnd && i_Line.me_Line == i_Line.me_Offset)
                     {
                         cAxis i_Axis = mi_Axis[(int)i_Line.me_Line];
@@ -4854,42 +4925,45 @@ namespace Plot3D
                             b_Legend = true; // do not draw a label if a legend has already been drawn (see Demo Sphere)
                         }
                     }
-                    
-                    // Draw labels of raster lines
-                    if (me_Raster == eRaster.Labels && !b_Legend && !String.IsNullOrEmpty(i_Line.ms_Label))
+
+                    if (me_Raster != eRaster.Labels || b_Legend || String.IsNullOrEmpty(i_Line.ms_Label))
+                        continue;
+
+                    if (i_Line.me_Line == eCoord.Y && i_Line.me_Offset != eCoord.X) // Z ticks (+ "0") on both walls
                     {
-                        Brush        i_Brush = null;
-                        StringFormat i_Align = new StringFormat();
-                        PointF       k_Pos   = i_Line.mi_Points[1].mi_P2D.Coord;
-
-                        if (i_Line.me_Line == eCoord.Y)
-                        {
-                            if (i_Line.me_Offset == eCoord.X)
-                            {
-                                k_Pos.X += (float)mi_Transform.ProjectXY(5, -5);
-                                k_Pos.Y += (float)mi_Transform.ProjectXY(-Font.Height / 2, 5);
-                                i_Brush = AxisX.LegendBrush;
-                            }
-                            else // Y (Main axis) and Z (Raster)
-                            {
-                                k_Pos.X += 5;
-                                k_Pos.Y -= Font.Height / 2;
-                                i_Brush = AxisZ.LegendBrush;
-                            }
-                        }
-                        else if (i_Line.me_Line == eCoord.X && i_Line.me_Offset == eCoord.Y)
-                        {
-                            k_Pos.X += (float)mi_Transform.ProjectXY(5, -5);
-                            k_Pos.Y += (float)mi_Transform.ProjectXY(5, -Font.Height / 2);
-                            i_Align.Alignment = StringAlignment.Far;
-                            i_Brush = AxisY.LegendBrush;
-                        }
-
-                        if (i_Brush != null)
-                            i_Graph.DrawString(i_Line.ms_Label, Font, i_Brush, k_Pos, i_Align);
+                        double d_Z = i_Line.mi_Points[0].mi_P3D.Z;
+                        DrawZLabel(md_RearX, d_FrontY, d_Z, i_Line.ms_Label); // YZ wall outer edge
+                        DrawZLabel(d_FrontX, md_RearY, d_Z, i_Line.ms_Label); // XZ wall outer edge
                     }
-                } // if (Line != null)
-            } // foreach (cDrawObj)
+                    else // floor (X / Y) ticks anchored to the front floor edge
+                    {
+                        Brush i_Brush    = null;
+                        int   s32_Anchor = 1;
+
+                        if (i_Line.me_Line == eCoord.Y && i_Line.me_Offset == eCoord.X) // X axis ticks
+                        {
+                            s32_Anchor = (i_Line.mi_Points[0].mi_P3D.Y == d_FrontY) ? 0 : 1;
+                            i_Brush    = AxisX.LegendBrush;
+                        }
+                        else if (i_Line.me_Line == eCoord.X && i_Line.me_Offset == eCoord.Y) // Y axis ticks
+                        {
+                            s32_Anchor = (i_Line.mi_Points[0].mi_P3D.X == d_FrontX) ? 0 : 1;
+                            i_Brush    = AxisY.LegendBrush;
+                        }
+
+                        if (i_Brush == null)
+                            continue;
+
+                        PointF       k_Pos   = i_Line.mi_Points[s32_Anchor].mi_P2D.Coord;
+                        StringFormat i_Align = new StringFormat();
+                        // Centre every tick label the same way so the row stays evenly spaced - a
+                        // left/right justification that flips at the view centre opens an uneven gap there.
+                        i_Align.Alignment = StringAlignment.Center;
+                        k_Pos.Y += (k_Pos.Y >= k_Center2D.Y) ? 3 : -(Font.Height + 3);
+                        i_Graph.DrawString(i_Line.ms_Label, Font, i_Brush, k_Pos, i_Align);
+                    }
+                } // foreach (cLine)
+            }
 
             #if DEBUG_SPEED
                 FormatStopwatch("Render Objects: ", i_Watch, i_Debug);
