@@ -864,6 +864,7 @@ namespace TableEditor.Controls
             this.btn_Multiply.Name = "btn_Multiply";
             this.btn_Multiply.Size = new System.Drawing.Size(34, 36);
             this.btn_Multiply.TabIndex = 21;
+            this.toolTip.SetToolTip(this.btn_Multiply, "Multiply selected cells by value");
             this.btn_Multiply.UseVisualStyleBackColor = false;
             this.btn_Multiply.Click += new System.EventHandler(this.btn_Multiply_Click);
             //
@@ -894,6 +895,7 @@ namespace TableEditor.Controls
             this.btn_Divide.Name = "btn_Divide";
             this.btn_Divide.Size = new System.Drawing.Size(34, 36);
             this.btn_Divide.TabIndex = 10;
+            this.toolTip.SetToolTip(this.btn_Divide, "Divide selected cells by value");
             this.btn_Divide.UseVisualStyleBackColor = false;
             this.btn_Divide.Click += new System.EventHandler(this.btn_Divide_Click);
             //
@@ -909,6 +911,7 @@ namespace TableEditor.Controls
             this.btn_Add.Name = "btn_Add";
             this.btn_Add.Size = new System.Drawing.Size(34, 36);
             this.btn_Add.TabIndex = 11;
+            this.toolTip.SetToolTip(this.btn_Add, "Add value to selected cells");
             this.btn_Add.UseVisualStyleBackColor = false;
             this.btn_Add.Click += new System.EventHandler(this.btn_Add_Click);
             //
@@ -924,6 +927,7 @@ namespace TableEditor.Controls
             this.btn_Subtract.Name = "btn_Subtract";
             this.btn_Subtract.Size = new System.Drawing.Size(34, 36);
             this.btn_Subtract.TabIndex = 12;
+            this.toolTip.SetToolTip(this.btn_Subtract, "Subtract value from selected cells");
             this.btn_Subtract.UseVisualStyleBackColor = false;
             this.btn_Subtract.Click += new System.EventHandler(this.btn_Subtract_Click);
             //
@@ -937,6 +941,7 @@ namespace TableEditor.Controls
             this.btn_Paste.Name = "btn_Paste";
             this.btn_Paste.Size = new System.Drawing.Size(34, 36);
             this.btn_Paste.TabIndex = 9;
+            this.toolTip.SetToolTip(this.btn_Paste, "Paste");
             this.btn_Paste.UseVisualStyleBackColor = true;
             this.btn_Paste.Click += new System.EventHandler(this.btn_Paste_Click);
             //
@@ -950,6 +955,7 @@ namespace TableEditor.Controls
             this.btn_Copy.Name = "btn_Copy";
             this.btn_Copy.Size = new System.Drawing.Size(34, 36);
             this.btn_Copy.TabIndex = 9;
+            this.toolTip.SetToolTip(this.btn_Copy, "Copy");
             this.btn_Copy.UseVisualStyleBackColor = true;
             this.btn_Copy.Click += new System.EventHandler(this.btn_Copy_Click);
             //
